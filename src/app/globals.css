@@ -1,26 +1,388 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --accent: #F5EEA8;
+  --text: #000000;
+  --bg: #ffffff;
+  --muted: #6B7280;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Custom checkbox styles */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 3px solid black;
+  background-color: transparent;
+  cursor: pointer;
+  position: relative;
+  border-radius: 3px;
+}
+
+input[type="checkbox"]:checked {
+  background-color: black;
+}
+
+input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -2px;
+  left: 2px;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Rich editor styles */
+.rich-editor {
+  min-height: 80px;
+  padding: 12px;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  direction: ltr;
+  text-align: left;
+}
+
+.rich-editor:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(245, 238, 168, 0.2);
+}
+
+.rich-editor:empty:before {
+  content: attr(data-placeholder);
+  color: #9CA3AF;
+}
+
+.rich-editor ul, .rich-editor ol {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.rich-editor li {
+  margin: 4px 0;
+}
+
+/* Modal styles - ensure proper stacking */
+.modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 1000 !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* PDF generation compatibility - convert oklch colors to rgb */
+.pdf-export {
+  color: rgb(0, 0, 0) !important;
+  background-color: rgb(255, 255, 255) !important;
+}
+
+.pdf-export * {
+  color: rgb(0, 0, 0) !important;
+  background-color: transparent !important;
+}
+
+/* Override CSS custom properties for PDF export */
+.pdf-export {
+  --accent: rgb(245, 238, 168);
+  --text: rgb(0, 0, 0);
+  --bg: rgb(255, 255, 255);
+  --muted: rgb(107, 114, 128);
+  --success: rgb(16, 185, 129);
+  --warning: rgb(245, 158, 11);
+  --danger: rgb(239, 68, 68);
+}
+
+/* Override all potential Tailwind color classes for PDF */
+.pdf-export .bg-yellow-50,
+.pdf-export .bg-yellow-100,
+.pdf-export .bg-yellow-200,
+.pdf-export .bg-\[var\(--accent\)\],
+.pdf-export .bg-accent {
+  background-color: rgb(245, 238, 168) !important;
+}
+
+.pdf-export .bg-gray-50,
+.pdf-export .bg-gray-100 {
+  background-color: rgb(249, 250, 251) !important;
+}
+
+.pdf-export .bg-gray-200 {
+  background-color: rgb(229, 231, 235) !important;
+}
+
+.pdf-export .bg-white {
+  background-color: rgb(255, 255, 255) !important;
+}
+
+.pdf-export .text-black {
+  color: rgb(0, 0, 0) !important;
+}
+
+.pdf-export .text-gray-500 {
+  color: rgb(107, 114, 128) !important;
+}
+
+.pdf-export .text-gray-600 {
+  color: rgb(75, 85, 99) !important;
+}
+
+.pdf-export .text-gray-700 {
+  color: rgb(55, 65, 81) !important;
+}
+
+.pdf-export .border-black {
+  border-color: rgb(0, 0, 0) !important;
+}
+
+.pdf-export .border-gray-200 {
+  border-color: rgb(229, 231, 235) !important;
+}
+
+.pdf-export .border-gray-300 {
+  border-color: rgb(209, 213, 219) !important;
+}
+
+/* Reduce line spacing for profile and customer data in PDF */
+.pdf-export .invoice-preview-from p,
+.pdf-export .invoice-preview-details p,
+.pdf-export .invoice-preview-to p {
+  margin: 0 !important;
+  line-height: 1.2 !important;
+  margin-bottom: 2px !important;
+}
+
+.pdf-export .invoice-preview-from,
+.pdf-export .invoice-preview-to {
+  line-height: 1.2 !important;
+}
+
+/* Specific spacing for profile data (company info) */
+.pdf-export .invoice-preview-from p:not(:last-child) {
+  margin-bottom: 2px !important;
+}
+
+/* Specific spacing for customer data */
+.pdf-export .invoice-preview-to p:not(:last-child) {
+  margin-bottom: 2px !important;
+}
+
+/* Adjust the "Rechnungsempfänger:" label spacing */
+.pdf-export .invoice-preview-to .text-xs {
+  margin-bottom: 4px !important;
+  line-height: 1.1 !important;
+}
+
+/* Specific overrides for colored backgrounds in PDF */
+.pdf-export .invoice-preview-items {
+  background-color: rgb(245, 238, 168) !important; /* var(--accent) as RGB */
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  clear: both !important;
+  margin-top: 32px !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.pdf-export .invoice-preview-items > div {
+  background-color: rgb(245, 238, 168) !important; /* Item backgrounds */
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+/* Reduce spacing between invoice items without description */
+.pdf-export .invoice-preview-items > div > div:not(.invoice-description) {
+  margin-bottom: 4px !important;
+}
+
+/* Items without description get minimal spacing */
+.pdf-export .invoice-preview-items > div:not(:has(.invoice-description)) {
+  margin-bottom: 4px !important;
+  padding: 8px !important;
+}
+
+/* Items with description keep normal spacing */
+.pdf-export .invoice-preview-items > div:has(.invoice-description) {
+  margin-bottom: 12px !important;
+  padding: 12px !important;
+}
+
+.pdf-export .invoice-preview-items h3 {
+  max-width: 100% !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  position: relative !important;
+  z-index: 3 !important;
+  margin: 0 0 24px 0 !important;
+}
+
+/* Ensure flex containers don't overflow in PDF */
+.pdf-export .flex {
+  max-width: 100% !important;
+  flex-wrap: wrap !important;
+}
+
+/* PDF container sizing */
+.pdf-export .invoice-preview {
+  max-width: 734px !important; /* A4 width minus margins */
+  margin: 20px auto !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  border: 3px solid rgb(0, 0, 0) !important;
+  border-radius: 8px !important;
+  background-color: rgb(255, 255, 255) !important;
+  min-height: auto !important;
+  height: auto !important;
+}
+
+/* Prevent overlapping in PDF */
+.pdf-export .invoice-preview-header {
+  display: block !important;
+  width: 100% !important;
+}
+
+.pdf-export .invoice-preview-from {
+  float: left !important;
+  width: 48% !important;
+  margin-bottom: 20px !important;
+}
+
+.pdf-export .invoice-preview-details {
+  float: right !important;
+  width: 48% !important;
+  text-align: right !important;
+  margin-bottom: 20px !important;
+}
+
+.pdf-export .invoice-preview-header::after {
+  content: "" !important;
+  display: table !important;
+  clear: both !important;
+}
+
+/* Ensure all sections are properly spaced in PDF */
+.pdf-export .invoice-preview-parties {
+  clear: both !important;
+  margin-top: 40px !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.pdf-export .invoice-preview-total {
+  clear: both !important;
+  margin-top: 30px !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.pdf-export .invoice-preview-payment {
+  clear: both !important;
+  margin-top: 60px !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.pdf-export .invoice-preview-payment .bg-gray-100 {
+  background-color: rgb(243, 244, 246) !important; /* Hellgrau für Zahlungsinfo-Box */
+}
+
+/* Hide footer elements in PDF */
+.pdf-export .no-print {
+  display: none !important;
+}
+
+/* Position payment info properly */
+.pdf-export .invoice-preview {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+}
+
+.pdf-export .invoice-preview-payment {
+  margin-top: 30px !important;
+  margin-bottom: 30px !important;
+  padding-top: 15px !important;
+  padding-bottom: 15px !important;
+  page-break-inside: avoid !important;
+}
+
+/* Reduce payment section internal spacing */
+.pdf-export .invoice-preview-payment h3 {
+  margin-bottom: 15px !important;
+}
+
+.pdf-export .invoice-preview-payment p {
+  margin-bottom: 8px !important;
+  line-height: 1.3 !important;
+}
+
+.pdf-export .invoice-preview-payment .bg-gray-100 {
+  padding: 20px !important;
+}
+
+.pdf-export .text-black { color: rgb(0, 0, 0) !important; }
+.pdf-export .text-gray-500 { color: rgb(107, 114, 128) !important; }
+.pdf-export .text-gray-700 { color: rgb(55, 65, 81) !important; }
+.pdf-export .bg-white { background-color: rgb(255, 255, 255) !important; }
+.pdf-export .border-black { border-color: rgb(0, 0, 0) !important; }
+
+/* Invoice description styles */
+.invoice-description {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: normal;
+}
+
+.invoice-description ul,
+.invoice-description ol {
+  margin: 8px 0;
+  padding-left: 20px;
+  direction: ltr;
+}
+
+.invoice-description li {
+  margin: 4px 0;
+  direction: ltr;
+  text-align: left;
+}
+
+/* Print styles */
+@media print {
+  body {
+    margin: 0;
+    overflow: visible;
+    height: auto;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
 }

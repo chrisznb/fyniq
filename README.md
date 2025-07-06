@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# fyniq
+
+fyniq ist eine moderne Rechnungsverwaltungs-App, entwickelt mit [Next.js](https://nextjs.org).
 
 ## Getting Started
 
