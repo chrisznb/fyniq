@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Star, Send, Heart, X, MessageCircle, User, Mail, Lightbulb, Clock, Ban } from 'lucide-react'
+import { Star, Send, Heart, X, MessageCircle, Mail, Lightbulb, Clock, Ban } from 'lucide-react'
 import { useUserActivity } from '@/contexts/UserActivityContext'
 
 interface FeedbackModalProps {

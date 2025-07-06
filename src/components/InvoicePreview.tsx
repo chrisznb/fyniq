@@ -13,7 +13,7 @@ interface InvoicePreviewProps {
 
 export default function InvoicePreview({ setCurrentView }: InvoicePreviewProps) {
   const { currentInvoice, customers, profile } = useData()
-  const { invoiceCount } = useUserActivity()
+  const { } = useUserActivity()
 
   if (!currentInvoice) {
     return (
@@ -46,7 +46,7 @@ export default function InvoicePreview({ setCurrentView }: InvoicePreviewProps) 
       invoiceElement.classList.add('pdf-export')
       
       // Force style recomputation by triggering a reflow
-      invoiceElement.offsetHeight
+      void invoiceElement.offsetHeight
       
       // Wait a bit for styles to be applied
       await new Promise(resolve => setTimeout(resolve, 100))
@@ -105,7 +105,6 @@ export default function InvoicePreview({ setCurrentView }: InvoicePreviewProps) 
       invoiceElement.classList.remove('pdf-export')
 
       // Calculate PDF dimensions
-      const imgData = canvas.toDataURL('image/png')
       const pdf = new jsPDF('p', 'mm', 'a4')
       
       // A4 dimensions in mm

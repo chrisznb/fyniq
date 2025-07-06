@@ -109,7 +109,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
           </div>
           <p className="text-xs text-gray-500 text-center flex items-center justify-center gap-1">
             <MapPin className="w-3 h-3" />
-            Zu finden im "Account" Tab
+            Zu finden im &quot;Account&quot; Tab
           </p>
         </div>
       )
@@ -128,14 +128,14 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
               Lege deine Kunden einmal an und wähle sie dann einfach beim Rechnung erstellen aus.
             </p>
             <ul className="text-sm text-gray-600 space-y-1">
-              <li>• Klick auf "Neuer Kunde"</li>
+              <li>• Klick auf &quot;Neuer Kunde&quot;</li>
               <li>• Name, Firma und Adresse eingeben</li>
               <li>• Optional: USt-ID für B2B Kunden</li>
             </ul>
           </div>
           <p className="text-xs text-gray-500 text-center flex items-center justify-center gap-1">
             <MapPin className="w-3 h-3" />
-            Zu finden im "Kunden" Tab
+            Zu finden im &quot;Kunden&quot; Tab
           </p>
         </div>
       )
@@ -154,7 +154,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
               In wenigen Sekunden von der Idee zur fertigen Rechnung mit Zahlungslink.
             </p>
             <ul className="text-sm text-gray-600 space-y-1">
-              <li>• Klick auf "Neue Rechnung"</li>
+              <li>• Klick auf &quot;Neue Rechnung&quot;</li>
               <li>• Kunde auswählen oder neu anlegen</li>
               <li>• Leistungen und Beträge eingeben</li>
               <li>• PDF generieren oder versenden</li>
@@ -162,7 +162,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
           </div>
           <p className="text-xs text-gray-500 text-center flex items-center justify-center gap-1">
             <MapPin className="w-3 h-3" />
-            Zu finden im "Rechnungen" Tab
+            Zu finden im &quot;Rechnungen&quot; Tab
           </p>
         </div>
       )
@@ -188,7 +188,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
           </div>
           <p className="text-xs text-gray-500 text-center flex items-center justify-center gap-1">
             <MapPin className="w-3 h-3" />
-            Zu finden im "Dashboard" Tab
+            Zu finden im &quot;Dashboard&quot; Tab
           </p>
         </div>
       )
