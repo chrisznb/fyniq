@@ -166,15 +166,19 @@ function DataProviderInner({ children }: { children: React.ReactNode }) {
           return { success: false, error: validation.errors?.join(', ') }
         }
         
-        const newInvoices = [...invoices, validation.data!]
+        const newInvoice = {
+          ...validation.data!,
+          id: Math.max(0, ...invoices.map(inv => inv.id)) + 1
+        }
+        const newInvoices = [...invoices, newInvoice]
         setInvoicesSecure(newInvoices)
         
         // Log audit trail
         const auditEntry = {
           timestamp: new Date().toISOString(),
           action: 'ADD_INVOICE',
-          entityId: invoice.id,
-          data: { invoiceNumber: invoice.number, amount: invoice.amount }
+          entityId: newInvoice.id,
+          data: { invoiceNumber: newInvoice.number, amount: newInvoice.amount }
         }
         setAuditLog(prev => [...prev, auditEntry])
         
@@ -191,7 +195,8 @@ function DataProviderInner({ children }: { children: React.ReactNode }) {
           return { success: false, error: validation.errors?.join(', ') }
         }
         
-        const updatedInvoices = invoices.map(inv => inv.id === invoice.id ? validation.data! : inv)
+        const updatedInvoice = { ...validation.data!, id: invoice.id }
+        const updatedInvoices = invoices.map(inv => inv.id === invoice.id ? updatedInvoice : inv)
         setInvoicesSecure(updatedInvoices)
         
         // Log audit trail
@@ -251,15 +256,19 @@ function DataProviderInner({ children }: { children: React.ReactNode }) {
           return { success: false, error: validation.errors?.join(', ') }
         }
         
-        const newCustomers = [...customers, validation.data!]
+        const newCustomer = {
+          ...validation.data!,
+          id: Math.max(0, ...customers.map(cust => cust.id)) + 1
+        }
+        const newCustomers = [...customers, newCustomer]
         setCustomersSecure(newCustomers)
         
         // Log audit trail
         const auditEntry = {
           timestamp: new Date().toISOString(),
           action: 'ADD_CUSTOMER',
-          entityId: customer.id,
-          data: { customerName: customer.name, email: customer.email }
+          entityId: newCustomer.id,
+          data: { customerName: newCustomer.name, email: newCustomer.email }
         }
         setAuditLog(prev => [...prev, auditEntry])
         
@@ -276,7 +285,8 @@ function DataProviderInner({ children }: { children: React.ReactNode }) {
           return { success: false, error: validation.errors?.join(', ') }
         }
         
-        const updatedCustomers = customers.map(cust => cust.id === customer.id ? validation.data! : cust)
+        const updatedCustomer = { ...validation.data!, id: customer.id }
+        const updatedCustomers = customers.map(cust => cust.id === customer.id ? updatedCustomer : cust)
         setCustomersSecure(updatedCustomers)
         
         // Log audit trail
@@ -364,16 +374,16 @@ function DataProviderInner({ children }: { children: React.ReactNode }) {
         
         const typedData = data as Record<string, unknown>
         
-        if (typedData.invoices && Array.isArray(typedData.invoices)) {
-          setInvoicesSecure(typedData.invoices as Invoice[])
+        if (typedData['invoices'] && Array.isArray(typedData['invoices'])) {
+          setInvoicesSecure(typedData['invoices'] as Invoice[])
         }
         
-        if (typedData.customers && Array.isArray(typedData.customers)) {
-          setCustomersSecure(typedData.customers as Customer[])
+        if (typedData['customers'] && Array.isArray(typedData['customers'])) {
+          setCustomersSecure(typedData['customers'] as Customer[])
         }
         
-        if (typedData.profile && typeof typedData.profile === 'object') {
-          setProfileSecure(typedData.profile as Profile)
+        if (typedData['profile'] && typeof typedData['profile'] === 'object') {
+          setProfileSecure(typedData['profile'] as Profile)
         }
         
         // Log audit trail
@@ -382,8 +392,8 @@ function DataProviderInner({ children }: { children: React.ReactNode }) {
           action: 'IMPORT_DATA',
           entityId: null,
           data: { 
-            invoiceCount: (typedData.invoices as unknown[])?.length || 0,
-            customerCount: (typedData.customers as unknown[])?.length || 0
+            invoiceCount: (typedData['invoices'] as unknown[])?.length || 0,
+            customerCount: (typedData['customers'] as unknown[])?.length || 0
           }
         }
         setAuditLog(prev => [...prev, auditEntry])

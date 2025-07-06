@@ -54,16 +54,16 @@ export function useSecureStorage<T>(
           
           if (storedHash && !verifyDataIntegrity(parsedValue, storedHash)) {
             console.warn(`Data integrity check failed for ${key}, using fallback`)
-            setValue(fallback)
+            setValue(fallback as T)
             setIsLoading(false)
             return
           }
         }
 
-        setValue(parsedValue)
+        setValue(parsedValue as T)
       } catch (error) {
         console.error(`Error loading ${key} from localStorage:`, error)
-        setValue(fallback)
+        setValue(fallback as T)
       } finally {
         setIsLoading(false)
       }
