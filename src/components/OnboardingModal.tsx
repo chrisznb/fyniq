@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { 
   User, 
   Users, 
@@ -68,7 +68,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
   const [isVisible, setIsVisible] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
 
-  const onboardingSteps: OnboardingStep[] = [
+  const onboardingSteps: OnboardingStep[] = useMemo(() => [
     {
       title: "Willkommen bei fyniq!",
       icon: <FyniqIcon />,
@@ -216,7 +216,31 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
       ),
       isLastStep: true
     }
-  ]
+  ], [])
+
+  const handleNext = useCallback(() => {
+    if (currentStep < onboardingSteps.length - 1) {
+      setCurrentStep(currentStep + 1)
+    }
+  }, [currentStep, onboardingSteps.length])
+
+  const handlePrevious = useCallback(() => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1)
+    }
+  }, [currentStep])
+
+  const handleFinish = useCallback(() => {
+    // Setze localStorage-Flag dass Onboarding gesehen wurde
+    localStorage.setItem('hasSeenOnboarding', 'true')
+    onClose()
+  }, [onClose])
+
+  const handleSkip = useCallback(() => {
+    // Setze localStorage-Flag auch beim Überspringen
+    localStorage.setItem('hasSeenOnboarding', 'true')
+    onClose()
+  }, [onClose])
 
   useEffect(() => {
     if (isOpen) {
@@ -249,35 +273,11 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, currentStep])
+  }, [isOpen, currentStep, onboardingSteps, handleNext, handlePrevious, handleSkip])
 
   if (!isOpen) return null
 
   const currentStepData = onboardingSteps[currentStep]
-
-  const handleNext = () => {
-    if (currentStep < onboardingSteps.length - 1) {
-      setCurrentStep(currentStep + 1)
-    }
-  }
-
-  const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
-    }
-  }
-
-  const handleFinish = () => {
-    // Setze localStorage-Flag dass Onboarding gesehen wurde
-    localStorage.setItem('hasSeenOnboarding', 'true')
-    onClose()
-  }
-
-  const handleSkip = () => {
-    // Setze localStorage-Flag auch beim Überspringen
-    localStorage.setItem('hasSeenOnboarding', 'true')
-    onClose()
-  }
 
   return (
     <div className="fixed inset-0 flex items-center justify-center p-4 z-50" style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>

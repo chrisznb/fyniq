@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 
 interface LandingPageProps {
   onGetStarted: () => void
@@ -71,7 +72,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
       `}</style>
 
       <header className="flex items-center gap-3 p-8 text-2xl font-bold animate-[fadeIn_1s_ease-in]">
-        <img src="/fyniq-logo.png" alt="fyniq Logo" className="h-8 w-auto" />
+        <Image src="/fyniq-logo.png" alt="fyniq Logo" width={32} height={32} />
         <span>fyniq</span>
       </header>
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import OnboardingModal from '@/components/OnboardingModal'
 import AppContainer from '@/components/AppContainer'
 import Header from '@/components/Header'
@@ -56,7 +57,7 @@ function HomeContent() {
           <NoSSR fallback={
             <header className="p-4 text-2xl font-bold flex items-center justify-between border-b-3 border-black flex-wrap gap-4">
               <div className="flex items-center gap-3">
-                <img src="/fyniq-logo.png" alt="fyniq logo" className="h-7 w-auto" />
+                <Image src="/fyniq-logo.png" alt="fyniq logo" width={28} height={28} />
                 <span>fyniq</span>
               </div>
             </header>

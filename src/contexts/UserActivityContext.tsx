@@ -52,6 +52,9 @@ export function UserActivityProvider({ children }: { children: React.ReactNode }
 
   // Initialize tracking data on mount
   useEffect(() => {
+    const tracker = activityTracker.current
+    if (!tracker) return
+    
     const data = getFeedbackTrackingData()
     setVisitCount(data.visitCount)
     setInvoiceCount(data.invoiceCount)
@@ -62,7 +65,7 @@ export function UserActivityProvider({ children }: { children: React.ReactNode }
     incrementVisitCount()
     
     // Start activity tracking
-    activityTracker.current.startTracking()
+    tracker.startTracking()
     
     // Check for feedback triggers periodically
     feedbackCheckInterval.current = setInterval(() => {
@@ -81,12 +84,12 @@ export function UserActivityProvider({ children }: { children: React.ReactNode }
       }
       
       // Update active time display
-      setTotalActiveTime(activityTracker.current.getActiveTime())
-      setIsUserActive(activityTracker.current.isActive())
+      setTotalActiveTime(tracker.getActiveTime())
+      setIsUserActive(tracker.isActive())
     }, 1000) // Check every second
     
     return () => {
-      activityTracker.current.stopTracking()
+      tracker.stopTracking()
       
       if (feedbackCheckInterval.current) {
         clearInterval(feedbackCheckInterval.current)

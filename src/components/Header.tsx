@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import { ViewType } from '@/types'
 import { MessageCircle } from 'lucide-react'
 import { useUserActivity } from '@/contexts/UserActivityContext'
@@ -42,7 +43,7 @@ export default function Header({ currentView, setCurrentView }: HeaderProps) {
   return (
     <header className="p-4 text-2xl font-bold flex items-center justify-between border-b-3 border-black flex-wrap gap-4">
         <div className="flex items-center gap-3">
-          <img src="/fyniq-logo.png" alt="fyniq logo" className="h-7 w-auto" />
+          <Image src="/fyniq-logo.png" alt="fyniq logo" width={28} height={28} />
           <span>fyniq</span>
         </div>
         
