@@ -85,23 +85,23 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
     const newErrors: {[key: string]: string} = {}
     
     if (formData.rating === 0) {
-      newErrors.rating = 'Bitte gib eine Bewertung ab'
+      newErrors['rating'] = 'Bitte gib eine Bewertung ab'
     }
     
     if (!formData.usage) {
-      newErrors.usage = 'Bitte wähle eine Option aus'
+      newErrors['usage'] = 'Bitte wähle eine Option aus'
     }
     
     if (!formData.pricing) {
-      newErrors.pricing = 'Bitte wähle eine Option aus'
+      newErrors['pricing'] = 'Bitte wähle eine Option aus'
     }
     
     if (!formData.recommendation) {
-      newErrors.recommendation = 'Bitte wähle eine Option aus'
+      newErrors['recommendation'] = 'Bitte wähle eine Option aus'
     }
     
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Bitte gib eine gültige E-Mail-Adresse ein'
+      newErrors['email'] = 'Bitte gib eine gültige E-Mail-Adresse ein'
     }
     
     setErrors(newErrors)
@@ -134,7 +134,7 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
 
   const handleRating = (rating: number) => {
     setFormData(prev => ({ ...prev, rating }))
-    if (errors.rating) {
+    if (errors['rating']) {
       setErrors(prev => ({ ...prev, rating: '' }))
     }
   }
@@ -270,8 +270,8 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                 </span>
               )}
             </div>
-            {errors.rating && (
-              <p className="text-red-500 text-sm mt-1">{errors.rating}</p>
+            {errors['rating'] && (
+              <p className="text-red-500 text-sm mt-1">{errors['rating']}</p>
             )}
           </div>
 
@@ -300,8 +300,8 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                 </label>
               ))}
             </div>
-            {errors.usage && (
-              <p className="text-red-500 text-sm mt-1">{errors.usage}</p>
+            {errors['usage'] && (
+              <p className="text-red-500 text-sm mt-1">{errors['usage']}</p>
             )}
           </div>
 
@@ -331,8 +331,8 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                 </label>
               ))}
             </div>
-            {errors.pricing && (
-              <p className="text-red-500 text-sm mt-1">{errors.pricing}</p>
+            {errors['pricing'] && (
+              <p className="text-red-500 text-sm mt-1">{errors['pricing']}</p>
             )}
           </div>
 
@@ -389,8 +389,8 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                 </label>
               ))}
             </div>
-            {errors.recommendation && (
-              <p className="text-red-500 text-sm mt-1">{errors.recommendation}</p>
+            {errors['recommendation'] && (
+              <p className="text-red-500 text-sm mt-1">{errors['recommendation']}</p>
             )}
           </div>
 
@@ -407,8 +407,8 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
               className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-[var(--accent)] outline-none"
               placeholder="deine@email.de"
             />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            {errors['email'] && (
+              <p className="text-red-500 text-sm mt-1">{errors['email']}</p>
             )}
             <p className="text-xs text-gray-500 mt-1">
               Nur wenn du möchtest, dass wir dir bei Fragen antworten oder Updates senden

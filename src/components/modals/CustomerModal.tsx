@@ -59,10 +59,10 @@ export default function CustomerModal({ onClose, editCustomerId }: CustomerModal
     const customerData: Omit<Customer, 'id'> = {
       customerNumber: formData.customerNumber,
       name: formData.name,
-      company: formData.company || undefined,
+      ...(formData.company && { company: formData.company }),
       email: formData.email,
       address: address,
-      taxId: formData.taxId || undefined,
+      ...(formData.taxId && { taxId: formData.taxId }),
     }
 
     if (isEdit && editCustomerId) {

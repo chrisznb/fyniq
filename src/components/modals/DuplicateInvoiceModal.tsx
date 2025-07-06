@@ -37,11 +37,14 @@ export default function DuplicateInvoiceModal({ onClose, sourceInvoice }: Duplic
     if (!customer) return
 
     // Erstelle duplizierte Rechnung
+    const currentDate = new Date().toISOString().split('T')[0]
+    const invoiceDate = (options.changeDate && formData.date ? formData.date : currentDate) as string
+    
     const duplicatedInvoice: Invoice = {
       id: Date.now(),
       number: generateInvoiceNumber(customer.customerNumber, invoices),
-      date: options.changeDate ? formData.date : new Date().toISOString().split('T')[0],
-      dueDate: calculateDueDate(options.changeDate ? formData.date : new Date().toISOString().split('T')[0]),
+      date: invoiceDate,
+      dueDate: calculateDueDate(invoiceDate),
       customerId: options.changeCustomer ? customer.id : sourceInvoice.customerId,
       customerName: options.changeCustomer ? customer.name : sourceInvoice.customerName,
       amount: sourceInvoice.amount,

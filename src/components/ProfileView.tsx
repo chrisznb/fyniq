@@ -3,10 +3,13 @@
 import { useState } from 'react'
 import { useData } from '@/contexts/DataContext'
 import { getFirstName } from '@/utils/helpers'
+import { useNotification } from '@/contexts/NotificationContext'
+import Link from 'next/link'
 
 export default function ProfileView() {
   const { profile, setProfile } = useData()
-  const [currentView, setCurrentView] = useState<'menu' | 'edit' | 'settings' | 'imprint' | 'privacy'>('menu')
+  const { showSuccess } = useNotification()
+  const [currentView, setCurrentView] = useState<'menu' | 'edit' | 'settings' | 'imprint' | 'privacy' | 'data'>('menu')
   const [formData, setFormData] = useState(profile)
 
   const firstName = getFirstName(profile.companyName)
@@ -30,6 +33,8 @@ export default function ProfileView() {
         return renderInfoPage('Impressum', 'Hier würde dein Impressum stehen. Bitte ergänze diese Informationen entsprechend den gesetzlichen Anforderungen.')
       case 'privacy':
         return renderInfoPage('Datenschutz', 'Hier würde deine Datenschutzerklärung stehen. Bitte ergänze diese Informationen entsprechend der DSGVO.')
+      case 'data':
+        return renderDataManagement()
       default:
         return renderMenu()
     }
@@ -69,22 +74,42 @@ export default function ProfileView() {
         </div>
 
         <div className="border-3 border-black rounded-lg p-6 bg-white">
-          <h3 className="text-xl font-semibold mb-4">Rechtliches</h3>
+          <h3 className="text-xl font-semibold mb-4">Datenschutz & Sicherheit</h3>
           <div className="space-y-3">
             <button
-              onClick={() => setCurrentView('imprint')}
+              onClick={() => setCurrentView('data')}
               className="w-full flex justify-between items-center p-4 hover:bg-gray-50 rounded-lg transition-colors text-lg"
             >
-              <span>Impressum</span>
+              <span>Datenmanagement</span>
               <span className="text-xl">→</span>
             </button>
-            <button
-              onClick={() => setCurrentView('privacy')}
+            <Link
+              href="/datenschutz"
               className="w-full flex justify-between items-center p-4 hover:bg-gray-50 rounded-lg transition-colors text-lg"
             >
               <span>Datenschutz</span>
               <span className="text-xl">→</span>
-            </button>
+            </Link>
+            <Link
+              href="/cookies"
+              className="w-full flex justify-between items-center p-4 hover:bg-gray-50 rounded-lg transition-colors text-lg"
+            >
+              <span>Cookie-Einstellungen</span>
+              <span className="text-xl">→</span>
+            </Link>
+          </div>
+        </div>
+
+        <div className="border-3 border-black rounded-lg p-6 bg-white">
+          <h3 className="text-xl font-semibold mb-4">Rechtliches</h3>
+          <div className="space-y-3">
+            <Link
+              href="/impressum"
+              className="w-full flex justify-between items-center p-4 hover:bg-gray-50 rounded-lg transition-colors text-lg"
+            >
+              <span>Impressum</span>
+              <span className="text-xl">→</span>
+            </Link>
           </div>
         </div>
       </div>
@@ -306,6 +331,115 @@ export default function ProfileView() {
       </div>
     </div>
   )
+
+  const renderDataManagement = () => {
+    const handleExportData = () => {
+      const allData: Record<string, unknown> = {}
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i)
+        if (key) {
+          try {
+            allData[key] = JSON.parse(localStorage.getItem(key) || '{}')
+          } catch {
+            allData[key] = localStorage.getItem(key)
+          }
+        }
+      }
+      
+      const dataStr = JSON.stringify(allData, null, 2)
+      const dataBlob = new Blob([dataStr], { type: 'application/json' })
+      const url = URL.createObjectURL(dataBlob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `fyniq-daten-export-${new Date().toISOString().split('T')[0]}.json`
+      link.click()
+      URL.revokeObjectURL(url)
+      
+      showSuccess('Daten wurden erfolgreich exportiert')
+    }
+
+    const handleDeleteAll = async () => {
+      const confirmed = confirm('Alle Daten löschen?\n\nMöchten Sie wirklich alle gespeicherten Daten löschen? Dies umfasst alle Rechnungen, Kunden und Einstellungen. Diese Aktion kann nicht rückgängig gemacht werden.')
+      
+      if (confirmed) {
+        const consentBackup = localStorage.getItem('cookieConsent')
+        localStorage.clear()
+        if (consentBackup) {
+          localStorage.setItem('cookieConsent', consentBackup)
+        }
+        showSuccess('Alle Daten wurden gelöscht')
+        setTimeout(() => {
+          window.location.href = '/'
+        }, 1500)
+      }
+    }
+
+    return (
+      <div className="w-full h-full flex flex-col">
+        <div className="flex items-center mb-6 flex-shrink-0">
+          <button
+            onClick={() => setCurrentView('menu')}
+            className="text-3xl mr-5 hover:text-gray-600"
+          >
+            ←
+          </button>
+          <h2 className="text-3xl font-bold">Datenmanagement</h2>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto space-y-6">
+          <div className="border-3 border-black rounded-lg p-6 bg-blue-50">
+            <h3 className="text-xl font-semibold mb-4">Datenexport</h3>
+            <p className="text-gray-700 mb-4">
+              Exportieren Sie alle Ihre in fyniq gespeicherten Daten als JSON-Datei. 
+              Diese Datei enthält alle Rechnungen, Kunden und Einstellungen.
+            </p>
+            <button
+              onClick={handleExportData}
+              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+            >
+              Alle Daten exportieren
+            </button>
+          </div>
+
+          <div className="border-3 border-black rounded-lg p-6 bg-red-50">
+            <h3 className="text-xl font-semibold mb-4">Alle Daten löschen</h3>
+            <p className="text-gray-700 mb-4">
+              <strong>Achtung:</strong> Diese Aktion löscht unwiderruflich alle Ihre in fyniq gespeicherten Daten. 
+              Bitte erstellen Sie vorher ein Backup über den Export.
+            </p>
+            <button
+              onClick={handleDeleteAll}
+              className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
+            >
+              Alle Daten unwiderruflich löschen
+            </button>
+          </div>
+
+          <div className="border-3 border-black rounded-lg p-6 bg-white">
+            <h3 className="text-xl font-semibold mb-4">Informationen zur Datenspeicherung</h3>
+            <ul className="space-y-2 text-gray-700">
+              <li className="flex items-start">
+                <span className="mr-2">•</span>
+                <span>Alle Daten werden ausschließlich lokal in Ihrem Browser gespeichert</span>
+              </li>
+              <li className="flex items-start">
+                <span className="mr-2">•</span>
+                <span>Es findet keine Übertragung an externe Server statt</span>
+              </li>
+              <li className="flex items-start">
+                <span className="mr-2">•</span>
+                <span>Sie haben jederzeit die volle Kontrolle über Ihre Daten</span>
+              </li>
+              <li className="flex items-start">
+                <span className="mr-2">•</span>
+                <span>Bei der Löschung der Browserdaten werden auch Ihre fyniq-Daten gelöscht</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="p-8 h-full flex flex-col overflow-hidden">

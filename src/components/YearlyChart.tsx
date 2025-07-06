@@ -1,58 +1,73 @@
 'use client'
 
+import React, { memo, useMemo } from 'react'
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js'
 import { Bar } from 'react-chartjs-2'
 import { useData } from '@/contexts/DataContext'
+import { Invoice } from '@/types'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
-export default function YearlyChart() {
+/**
+ * Performance-optimized chart calculation hooks
+ */
+const useMonthlyChartData = (invoices: Invoice[]) => {
+  return useMemo(() => {
+    const currentYear = new Date().getFullYear()
+    
+    // Pre-filter invoices for current year to reduce iterations
+    const currentYearInvoices = invoices.filter(inv => {
+      const invoiceDate = new Date(inv.date)
+      return invoiceDate.getFullYear() === currentYear
+    })
+
+    // Initialize arrays for better performance
+    const monthlyPaidData = new Array(12).fill(0)
+    const monthlyPendingData = new Array(12).fill(0)
+    
+    // Single pass through filtered invoices
+    currentYearInvoices.forEach(invoice => {
+      const invoiceDate = new Date(invoice.date)
+      const monthIndex = invoiceDate.getMonth() // 0-based month
+      
+      if (invoice.paid) {
+        monthlyPaidData[monthIndex] += invoice.amount
+      } else {
+        monthlyPendingData[monthIndex] += invoice.amount
+      }
+    })
+
+    return { monthlyPaidData, monthlyPendingData }
+  }, [invoices])
+}
+
+function YearlyChart() {
   const { invoices } = useData()
+  const { monthlyPaidData, monthlyPendingData } = useMonthlyChartData(invoices)
 
-  // Group invoices by month and payment status
-  const monthlyPaidData = Array.from({ length: 12 }, (_, i) => {
-    const month = i + 1
-    const monthInvoices = invoices.filter(inv => {
-      const invoiceDate = new Date(inv.date)
-      return invoiceDate.getMonth() + 1 === month && 
-             invoiceDate.getFullYear() === new Date().getFullYear() &&
-             inv.paid === true
-    })
-    return monthInvoices.reduce((sum, inv) => sum + inv.amount, 0)
-  })
-
-  const monthlyPendingData = Array.from({ length: 12 }, (_, i) => {
-    const month = i + 1
-    const monthInvoices = invoices.filter(inv => {
-      const invoiceDate = new Date(inv.date)
-      return invoiceDate.getMonth() + 1 === month && 
-             invoiceDate.getFullYear() === new Date().getFullYear() &&
-             inv.paid === false
-    })
-    return monthInvoices.reduce((sum, inv) => sum + inv.amount, 0)
-  })
-
-  const data = {
+  // Memoize chart data to prevent unnecessary re-renders
+  const chartData = useMemo(() => ({
     labels: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
     datasets: [
       {
         label: 'Bezahlt',
         data: monthlyPaidData,
-        backgroundColor: '#F5EEA8', // Yellow for paid
+        backgroundColor: '#F5EEA8',
         borderColor: '#000',
         borderWidth: 3,
       },
       {
         label: 'Ausstehend',
         data: monthlyPendingData,
-        backgroundColor: 'rgba(245, 238, 168, 0.4)', // Transparent yellow for pending
+        backgroundColor: 'rgba(245, 238, 168, 0.4)',
         borderColor: '#000',
         borderWidth: 3,
       },
     ],
-  }
+  }), [monthlyPaidData, monthlyPendingData])
 
-  const options = {
+  // Memoize chart options to prevent Chart.js re-initialization
+  const chartOptions = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -65,7 +80,7 @@ export default function YearlyChart() {
       tooltip: {
         callbacks: {
           title: (context: Array<{ label: string }>) => {
-            return `${context[0].label} 2025`
+            return `${context[0].label} ${new Date().getFullYear()}`
           },
           label: (context: { parsed: { y: number }, dataset: { label?: string } }) => {
             const value = context.parsed.y
@@ -98,11 +113,14 @@ export default function YearlyChart() {
         },
       },
     },
-  }
+  }), [])
 
   return (
     <div className="w-full h-full">
-      <Bar data={data} options={options} />
+      <Bar data={chartData} options={chartOptions} />
     </div>
   )
 }
+
+// Export memoized component for performance optimization
+export default memo(YearlyChart)

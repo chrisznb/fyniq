@@ -196,13 +196,32 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         </div>
       </section>
 
-      <footer className="rounded-b-[10px] border-t-2 border-[#E5E7EB] bg-white py-[60px] px-8 text-center">
-        <p className="text-sm text-[#6B7280]">© 2025 fyniq – Einfach bezahlt werden</p>
-        <p className="mt-2 text-sm text-[#6B7280]">
-          <a href="#" className="text-[#6B7280] no-underline mr-3">Impressum</a>
-          ·
-          <a href="#" className="text-[#6B7280] no-underline ml-3">Datenschutz</a>
-        </p>
+      <footer className="rounded-b-[10px] border-t-3 border-black bg-white px-5 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="text-sm text-gray-600">
+            © 2024 fyniq Beta · Railway EU-Hosting
+          </div>
+          <nav className="flex items-center gap-6">
+            <a 
+              href="/datenschutz" 
+              className="text-sm text-gray-600 hover:text-black transition-colors underline"
+            >
+              Datenschutz
+            </a>
+            <a 
+              href="/impressum" 
+              className="text-sm text-gray-600 hover:text-black transition-colors underline"
+            >
+              Impressum
+            </a>
+            <a 
+              href="/cookies" 
+              className="text-sm text-gray-600 hover:text-black transition-colors underline"
+            >
+              Cookie-Einstellungen
+            </a>
+          </nav>
+        </div>
       </footer>
     </div>
   )

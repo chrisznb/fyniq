@@ -9,13 +9,12 @@ import InvoicesView from '@/components/InvoicesView'
 import CustomersView from '@/components/CustomersView'
 import ProfileView from '@/components/ProfileView'
 import InvoicePreview from '@/components/InvoicePreview'
-import { DataProvider } from '@/contexts/DataContext'
-import { ModalProvider } from '@/contexts/ModalContext'
-import { NotificationProvider } from '@/contexts/NotificationContext'
-import { UserActivityProvider } from '@/contexts/UserActivityContext'
+import CookieBanner from '@/components/CookieBanner'
+import NoSSR from '@/components/NoSSR'
 import ModalPortal from '@/components/ModalPortal'
 import ToastContainer from '@/components/notifications/ToastContainer'
 import FeedbackModal from '@/components/FeedbackModal'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { useUserActivity } from '@/contexts/UserActivityContext'
 
 function IntelligentFeedbackModal() {
@@ -29,7 +28,9 @@ function IntelligentFeedbackModal() {
   )
 }
 
-export default function Home() {
+export const dynamic = 'force-dynamic'
+
+function HomeContent() {
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [currentView, setCurrentView] = useState<'dashboard' | 'invoices' | 'customers' | 'profile' | 'invoice-preview'>('dashboard')
 
@@ -49,24 +50,36 @@ export default function Home() {
   }
 
   return (
-    <DataProvider>
-      <NotificationProvider>
-        <UserActivityProvider>
-          <ModalProvider>
-            <div className="relative">
-              <AppContainer>
-                <Header currentView={currentView} setCurrentView={setCurrentView} />
-                <main className="p-5 flex-1 overflow-hidden flex flex-col">
-                  {currentView === 'dashboard' && <Dashboard setCurrentView={setCurrentView} />}
-                  {currentView === 'invoices' && <InvoicesView setCurrentView={setCurrentView} />}
-                  {currentView === 'customers' && <CustomersView />}
-                  {currentView === 'profile' && <ProfileView />}
-                  {currentView === 'invoice-preview' && <InvoicePreview setCurrentView={setCurrentView} />}
-                </main>
-              </AppContainer>
-            </div>
-            
-            {/* Modals rendered outside AppContainer to avoid overflow issues */}
+    <ErrorBoundary level="page">
+      <div className="relative">
+        <AppContainer>
+          <NoSSR fallback={
+            <header className="p-4 text-2xl font-bold flex items-center justify-between border-b-3 border-black flex-wrap gap-4">
+              <div className="flex items-center gap-3">
+                <img src="/fyniq-logo.png" alt="fyniq logo" className="h-7 w-auto" />
+                <span>fyniq</span>
+              </div>
+            </header>
+          }>
+            <Header currentView={currentView} setCurrentView={setCurrentView} />
+          </NoSSR>
+          
+          <main className="p-5 flex-1 overflow-hidden flex flex-col">
+            <NoSSR>
+              <ErrorBoundary level="component">
+                {currentView === 'dashboard' && <Dashboard setCurrentView={setCurrentView} />}
+                {currentView === 'invoices' && <InvoicesView setCurrentView={setCurrentView} />}
+                {currentView === 'customers' && <CustomersView />}
+                {currentView === 'profile' && <ProfileView />}
+                {currentView === 'invoice-preview' && <InvoicePreview setCurrentView={setCurrentView} />}
+              </ErrorBoundary>
+            </NoSSR>
+          </main>
+        </AppContainer>
+        
+        {/* Modals rendered outside AppContainer to avoid overflow issues */}
+        <NoSSR>
+          <ErrorBoundary level="component">
             <ModalPortal />
             
             {/* Onboarding Modal */}
@@ -77,9 +90,16 @@ export default function Home() {
             
             {/* Toast notifications */}
             <ToastContainer />
-          </ModalProvider>
-        </UserActivityProvider>
-      </NotificationProvider>
-    </DataProvider>
+            
+            {/* Cookie Banner */}
+            <CookieBanner />
+          </ErrorBoundary>
+        </NoSSR>
+      </div>
+    </ErrorBoundary>
   )
+}
+
+export default function Home() {
+  return <HomeContent />
 }

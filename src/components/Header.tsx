@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { ViewType } from '@/types'
 import { MessageCircle } from 'lucide-react'
 import { useUserActivity } from '@/contexts/UserActivityContext'
@@ -7,8 +8,36 @@ interface HeaderProps {
   setCurrentView: (view: ViewType) => void
 }
 
+function FeedbackButton() {
+  const [isHydrated, setIsHydrated] = useState(false)
+  
+  // ALWAYS call the hook, even during SSR
+  let showFeedbackModal = () => {}
+  try {
+    const userActivity = useUserActivity()
+    showFeedbackModal = userActivity.showFeedbackModal
+  } catch {
+    // Hook will fail during SSR or before provider loads
+    showFeedbackModal = () => {}
+  }
+  
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+
+  return (
+    <button 
+      onClick={isHydrated ? showFeedbackModal : undefined}
+      className="px-4 py-2 text-sm font-semibold border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+      title="Feedback geben"
+    >
+      <MessageCircle className="w-4 h-4" />
+      <span className="hidden sm:inline">Feedback</span>
+    </button>
+  )
+}
+
 export default function Header({ currentView, setCurrentView }: HeaderProps) {
-  const { showFeedbackModal } = useUserActivity()
 
   return (
     <header className="p-4 text-2xl font-bold flex items-center justify-between border-b-3 border-black flex-wrap gap-4">
@@ -61,14 +90,7 @@ export default function Header({ currentView, setCurrentView }: HeaderProps) {
             </button>
           </nav>
           
-          <button
-            onClick={showFeedbackModal}
-            className="px-4 py-2 text-sm font-semibold border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
-            title="Feedback geben"
-          >
-            <MessageCircle className="w-4 h-4" />
-            <span className="hidden sm:inline">Feedback</span>
-          </button>
+          <FeedbackButton />
         </div>
       </header>
   )

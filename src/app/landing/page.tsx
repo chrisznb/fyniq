@@ -3,6 +3,8 @@
 import { useRouter } from 'next/navigation'
 import LandingPage from '@/components/LandingPage'
 
+export const dynamic = 'force-dynamic'
+
 export default function Landing() {
   const router = useRouter()
 
@@ -10,5 +12,7 @@ export default function Landing() {
     router.push('/')
   }
 
-  return <LandingPage onGetStarted={handleGetStarted} />
+  return (
+    <LandingPage onGetStarted={handleGetStarted} />
+  )
 }

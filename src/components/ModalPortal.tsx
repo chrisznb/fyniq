@@ -22,13 +22,13 @@ export default function ModalPortal() {
       {currentModal === 'invoice' && (
         <InvoiceModal 
           onClose={closeModal} 
-          editInvoiceId={'editInvoiceId' in modalProps ? modalProps.editInvoiceId : undefined} 
+          editInvoiceId={'editInvoiceId' in modalProps ? modalProps.editInvoiceId : null} 
         />
       )}
       {currentModal === 'customer' && (
         <CustomerModal 
           onClose={closeModal} 
-          editCustomerId={'editCustomerId' in modalProps ? modalProps.editCustomerId : undefined} 
+          editCustomerId={'editCustomerId' in modalProps ? modalProps.editCustomerId : null} 
         />
       )}
       {currentModal === 'duplicate-invoice' && modalProps && 'sourceInvoice' in modalProps && (

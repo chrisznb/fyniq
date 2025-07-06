@@ -19,11 +19,11 @@ export default function InvoiceModal({ onClose, editInvoiceId }: InvoiceModalPro
   const [formData, setFormData] = useState({
     customerId: '',
     date: new Date().toISOString().split('T')[0],
-    dueDate: calculateDueDate(new Date().toISOString().split('T')[0]),
+    dueDate: calculateDueDate(new Date().toISOString().split('T')[0] as string),
     invoiceNumber: '',
   })
   const [items, setItems] = useState<InvoiceItem[]>([
-    { name: '', amount: 0, quantity: 1, description: undefined }
+    { name: '', amount: 0, quantity: 1 }
   ])
 
   const isEdit = editInvoiceId !== null && editInvoiceId !== undefined
@@ -38,7 +38,7 @@ export default function InvoiceModal({ onClose, editInvoiceId }: InvoiceModalPro
           dueDate: invoice.dueDate,
           invoiceNumber: invoice.number,
         })
-        setItems(invoice.items || [{ name: '', amount: 0, quantity: 1, description: undefined }])
+        setItems(invoice.items || [{ name: '', amount: 0, quantity: 1 }])
       }
     }
   }, [isEdit, editInvoiceId, invoices])
@@ -59,7 +59,7 @@ export default function InvoiceModal({ onClose, editInvoiceId }: InvoiceModalPro
 
   const updateItem = (index: number, field: keyof InvoiceItem, value: string | number | undefined) => {
     const updatedItems = [...items]
-    updatedItems[index] = { ...updatedItems[index], [field]: value }
+    updatedItems[index] = { ...updatedItems[index], [field]: value } as InvoiceItem
     setItems(updatedItems)
   }
 

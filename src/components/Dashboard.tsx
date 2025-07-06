@@ -1,8 +1,9 @@
 'use client'
 
+import React, { memo, useMemo, useCallback } from 'react'
 import { useData } from '@/contexts/DataContext'
 import { useModal } from '@/contexts/ModalContext'
-import { ViewType } from '@/types'
+import { ViewType, Invoice } from '@/types'
 import { formatCurrency, getFirstName } from '@/utils/helpers'
 import YearlyChart from './YearlyChart'
 import RecentInvoices from './RecentInvoices'
@@ -11,20 +12,55 @@ interface DashboardProps {
   setCurrentView: (view: ViewType) => void
 }
 
-export default function Dashboard({ setCurrentView }: DashboardProps) {
+/**
+ * Performance-optimized statistics calculations
+ */
+const useDashboardStats = (invoices: Invoice[]) => {
+  return useMemo(() => {
+    const currentYear = new Date().getFullYear()
+    let totalRevenue = 0
+    let pendingAmount = 0
+    let currentYearRevenue = 0
+    
+    // Single pass through invoices for all calculations
+    invoices.forEach(invoice => {
+      const invoiceDate = new Date(invoice.date)
+      const isCurrentYear = invoiceDate.getFullYear() === currentYear
+      
+      if (invoice.paid) {
+        totalRevenue += invoice.amount
+        if (isCurrentYear) {
+          currentYearRevenue += invoice.amount
+        }
+      } else {
+        pendingAmount += invoice.amount
+      }
+    })
+
+    return {
+      totalRevenue,
+      pendingAmount,
+      invoiceCount: invoices.length,
+      currentYearRevenue,
+      currentYear
+    }
+  }, [invoices])
+}
+
+function Dashboard({ setCurrentView }: DashboardProps) {
   const { invoices, profile } = useData()
   const { openModal } = useModal()
-
-  // Calculate statistics
-  const totalRevenue = invoices.filter(inv => inv.paid).reduce((sum, inv) => sum + inv.amount, 0)
-  const pendingAmount = invoices.filter(inv => !inv.paid).reduce((sum, inv) => sum + inv.amount, 0)
-  const invoiceCount = invoices.length
-  const currentYear = new Date().getFullYear()
-  const currentYearRevenue = invoices
-    .filter(inv => new Date(inv.date).getFullYear() === currentYear && inv.paid)
-    .reduce((sum, inv) => sum + inv.amount, 0)
-
-  const firstName = getFirstName(profile.companyName)
+  
+  // Memoized statistics calculation
+  const stats = useDashboardStats(invoices)
+  
+  // Memoized user name calculation
+  const firstName = useMemo(() => getFirstName(profile.companyName), [profile.companyName])
+  
+  // Memoized callback for new invoice button
+  const handleNewInvoice = useCallback(() => {
+    openModal('invoice')
+  }, [openModal])
 
   return (
     <>
@@ -35,7 +71,7 @@ export default function Dashboard({ setCurrentView }: DashboardProps) {
             {firstName ? `Willkommen zurück, ${firstName}!` : 'Willkommen zurück!'}
           </h1>
           <button
-            onClick={() => openModal('invoice')}
+            onClick={handleNewInvoice}
             className="px-6 py-3 bg-[var(--accent)] border-3 border-black rounded-lg font-semibold hover:shadow-lg transition-all"
           >
             + Neue Rechnung
@@ -45,20 +81,20 @@ export default function Dashboard({ setCurrentView }: DashboardProps) {
         {/* Statistics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8 flex-shrink-0">
           <div className="border-3 border-black rounded-lg p-4 lg:p-6 bg-[var(--accent)] text-center">
-            <p className="text-2xl lg:text-3xl font-bold text-black">{formatCurrency(totalRevenue)}</p>
+            <p className="text-2xl lg:text-3xl font-bold text-black">{formatCurrency(stats.totalRevenue)}</p>
             <p className="text-sm text-[var(--muted)] mt-2">Gesamtumsatz</p>
           </div>
           <div className="border-3 border-black rounded-lg p-4 lg:p-6 bg-[var(--accent)] text-center">
-            <p className="text-2xl lg:text-3xl font-bold text-black">{formatCurrency(pendingAmount)}</p>
+            <p className="text-2xl lg:text-3xl font-bold text-black">{formatCurrency(stats.pendingAmount)}</p>
             <p className="text-sm text-[var(--muted)] mt-2">Ausstehend</p>
           </div>
           <div className="border-3 border-black rounded-lg p-4 lg:p-6 bg-[var(--accent)] text-center">
-            <p className="text-2xl lg:text-3xl font-bold text-black">{invoiceCount}</p>
+            <p className="text-2xl lg:text-3xl font-bold text-black">{stats.invoiceCount}</p>
             <p className="text-sm text-[var(--muted)] mt-2">Rechnungen</p>
           </div>
           <div className="border-3 border-black rounded-lg p-4 lg:p-6 bg-[var(--accent)] text-center">
-            <p className="text-2xl lg:text-3xl font-bold text-black">{formatCurrency(currentYearRevenue)}</p>
-            <p className="text-sm text-[var(--muted)] mt-2">{currentYear}</p>
+            <p className="text-2xl lg:text-3xl font-bold text-black">{formatCurrency(stats.currentYearRevenue)}</p>
+            <p className="text-sm text-[var(--muted)] mt-2">{stats.currentYear}</p>
           </div>
         </div>
 
@@ -86,3 +122,6 @@ export default function Dashboard({ setCurrentView }: DashboardProps) {
     </>
   )
 }
+
+// Export memoized component for performance optimization
+export default memo(Dashboard)
