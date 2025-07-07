@@ -43,7 +43,7 @@ export function useSecureStorage<T>(
           // Data is encrypted, decrypt it
           try {
             parsedValue = decryptData<T>(storedValue)
-          } catch (decryptError) {
+          } catch {
             // If decryption fails (e.g., missing key), clear the corrupted data
             console.warn(`Could not decrypt ${key}, clearing corrupted data`)
             localStorage.removeItem(key)
