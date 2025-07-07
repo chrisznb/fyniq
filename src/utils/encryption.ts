@@ -5,16 +5,32 @@ import CryptoJS from 'crypto-js'
  * Uses AES-256-GCM encryption with browser-generated keys
  */
 
-// Generate or retrieve encryption key from sessionStorage
+// Generate or retrieve encryption key
 const getEncryptionKey = (): string => {
-  const existingKey = sessionStorage.getItem('fyniq_enc_key')
+  // Check if we're in a browser environment
+  if (typeof window === 'undefined') {
+    throw new Error('Encryption key can only be accessed in browser environment')
+  }
+  
+  // First check sessionStorage for current session key
+  let existingKey = sessionStorage.getItem('fyniq_enc_key')
   if (existingKey) {
+    return existingKey
+  }
+  
+  // If not in session, check localStorage for persistent key
+  existingKey = localStorage.getItem('fyniq_enc_key_persistent')
+  if (existingKey) {
+    // Restore to sessionStorage for this session
+    sessionStorage.setItem('fyniq_enc_key', existingKey)
     return existingKey
   }
   
   // Generate new key using crypto API
   const key = CryptoJS.lib.WordArray.random(256/8).toString()
   sessionStorage.setItem('fyniq_enc_key', key)
+  // Also store in localStorage for persistence across sessions
+  localStorage.setItem('fyniq_enc_key_persistent', key)
   return key
 }
 
@@ -78,6 +94,7 @@ export const isEncrypted = (data: string): boolean => {
  */
 export const clearEncryptionKey = (): void => {
   sessionStorage.removeItem('fyniq_enc_key')
+  localStorage.removeItem('fyniq_enc_key_persistent')
 }
 
 /**

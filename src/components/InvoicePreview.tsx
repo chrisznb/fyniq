@@ -194,18 +194,18 @@ export default function InvoicePreview({ setCurrentView }: InvoicePreviewProps) 
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header with actions */}
-      <div className="flex justify-between items-center mb-6 flex-shrink-0 no-print">
-        <h1 className="text-3xl font-bold">Rechnungsvorschau</h1>
-        <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mb-4 sm:mb-6 flex-shrink-0 no-print">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Rechnungsvorschau</h1>
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <button
             onClick={downloadPDF}
-            className="px-6 py-3 bg-[var(--accent)] text-black border-3 border-black rounded-lg font-semibold hover:shadow-lg transition-all"
+            className="px-4 sm:px-6 py-2 sm:py-3 bg-[var(--accent)] text-black border-3 border-black rounded-lg font-semibold hover:shadow-lg transition-all text-sm sm:text-base"
           >
             PDF Download
           </button>
           <button 
             onClick={() => setCurrentView('invoices')}
-            className="px-6 py-3 bg-gray-200 border-3 border-black rounded-lg font-semibold hover:shadow-lg transition-all"
+            className="px-4 sm:px-6 py-2 sm:py-3 bg-gray-200 border-3 border-black rounded-lg font-semibold hover:shadow-lg transition-all text-sm sm:text-base"
           >
             Zurück
           </button>
@@ -214,71 +214,73 @@ export default function InvoicePreview({ setCurrentView }: InvoicePreviewProps) 
 
       {/* Invoice Preview Content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto bg-white border-3 border-black rounded-lg p-8 print:border-none print:shadow-none">
+        <div className="max-w-4xl mx-auto bg-white border-3 border-black rounded-lg p-3 sm:p-6 lg:p-8 print:border-none print:shadow-none">
           <div className="invoice-preview" id="invoice-to-pdf">
             {/* Invoice Header */}
-            <div className="invoice-preview-header flex justify-between items-start">
+            <div className="invoice-preview-header flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6 lg:gap-0">
               <div className="invoice-preview-from text-left">
-                <p className="font-bold">{profile.companyName || 'Dein Unternehmen'}</p>
-                <p>{profile.companyStreet || 'Musterstraße 1'}</p>
-                <p>{profile.companyZip || '12345'} {profile.companyCity || 'Musterstadt'}</p>
-                {profile.companyEmail && <p>{profile.companyEmail}</p>}
-                {profile.companyPhone && <p>Tel: {profile.companyPhone}</p>}
+                <p className="font-bold text-sm sm:text-base">{profile.companyName || 'Dein Unternehmen'}</p>
+                <p className="text-sm sm:text-base">{profile.companyStreet || 'Musterstraße 1'}</p>
+                <p className="text-sm sm:text-base">{profile.companyZip || '12345'} {profile.companyCity || 'Musterstadt'}</p>
+                {profile.companyEmail && <p className="text-sm sm:text-base">{profile.companyEmail}</p>}
+                {profile.companyPhone && <p className="text-sm sm:text-base">Tel: {profile.companyPhone}</p>}
               </div>
-              <div className="invoice-preview-details text-right">
-                <h1 className="text-3xl font-bold mb-5">RECHNUNG</h1>
-                <p><strong>Rechnungsnummer:</strong> {currentInvoice.number}</p>
-                <p><strong>Rechnungsdatum:</strong> {formatDate(currentInvoice.date)}</p>
-                <p><strong>Leistungsdatum:</strong> {formatDate(currentInvoice.date)}</p>
-                {taxId && <p><strong>Steuer-ID:</strong> {taxId}</p>}
+              <div className="invoice-preview-details text-left lg:text-right">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-5">RECHNUNG</h1>
+                <p className="text-sm sm:text-base mb-1"><strong>Rechnungsnummer:</strong> {currentInvoice.number}</p>
+                <p className="text-sm sm:text-base mb-1"><strong>Rechnungsdatum:</strong> {formatDate(currentInvoice.date)}</p>
+                <p className="text-sm sm:text-base mb-1"><strong>Leistungsdatum:</strong> {formatDate(currentInvoice.date)}</p>
+                {taxId && <p className="text-sm sm:text-base"><strong>Steuer-ID:</strong> {taxId}</p>}
               </div>
             </div>
 
             {/* Customer Information */}
-            <div className="invoice-preview-parties mt-10">
+            <div className="invoice-preview-parties mt-6 sm:mt-8 lg:mt-10">
               <div className="invoice-preview-to">
-                <p className="text-xs mb-2">Rechnungsempfänger:</p>
-                <p className="font-bold">{customer ? customer.name : currentInvoice.customerName}</p>
-                {customer && customer.company && <p>{customer.company}</p>}
-                {customer && customer.taxId && <p>USt-ID: {customer.taxId}</p>}
+                <p className="text-xs sm:text-sm mb-2">Rechnungsempfänger:</p>
+                <p className="font-bold text-sm sm:text-base">{customer ? customer.name : currentInvoice.customerName}</p>
+                {customer && customer.company && <p className="text-sm sm:text-base">{customer.company}</p>}
+                {customer && customer.taxId && <p className="text-sm sm:text-base">USt-ID: {customer.taxId}</p>}
                 {customer && customer.address && (
                   <div>
                     {customer.address.split('\n').map((line, idx) => (
-                      <p key={idx}>{line}</p>
+                      <p key={idx} className="text-sm sm:text-base">{line}</p>
                     ))}
                   </div>
                 )}
-                {customer && <p>{customer.email}</p>}
+                {customer && <p className="text-sm sm:text-base">{customer.email}</p>}
               </div>
             </div>
 
             {/* Invoice Items */}
-            <div className="invoice-preview-items mt-8 p-4 bg-[var(--accent)] border-3 border-black rounded-lg">
-              <h3 className="text-xl font-bold mb-6">Leistungsbeschreibung</h3>
+            <div className="invoice-preview-items mt-6 sm:mt-8 p-3 sm:p-4 bg-[var(--accent)] border-3 border-black rounded-lg">
+              <h3 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6">Leistungsbeschreibung</h3>
               {currentInvoice.items && currentInvoice.items.length > 0 ? (
                 <div>
                   {currentInvoice.items.map((item, index) => (
                     <div 
                       key={index} 
-                      className={`p-4 bg-[var(--accent)] rounded-lg ${item.description ? 'mb-5' : 'mb-2'}`}
-                      style={{ marginBottom: item.description ? '20px' : '8px', padding: '16px', borderRadius: '8px', backgroundColor: 'var(--accent)' }}
+                      className={`p-2 sm:p-4 bg-[var(--accent)] rounded-lg ${item.description ? 'mb-3 sm:mb-5' : 'mb-2'}`}
+                      style={{ marginBottom: item.description ? '20px' : '8px', padding: 'clamp(8px, 2vw, 16px)', borderRadius: '8px', backgroundColor: 'var(--accent)' }}
                     >
                       <div 
                         className="flex justify-between items-center mb-2"
                         style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}
                       >
-                        <div className="flex items-center gap-3">
-                          <strong>{item.name}</strong>
-                          {item.quantity && item.quantity > 1 && (
-                            <span className="text-sm text-gray-700">({item.quantity}x {formatCurrency(item.amount || 0)})</span>
-                          )}
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                            <strong className="text-sm sm:text-base">{item.name}</strong>
+                            {item.quantity && item.quantity > 1 && (
+                              <span className="text-xs sm:text-sm text-gray-700">({item.quantity}x {formatCurrency(item.amount || 0)})</span>
+                            )}
+                          </div>
+                          <span className="text-sm sm:text-base font-medium">{formatCurrency((item.amount || 0) * (item.quantity || 1))}</span>
                         </div>
-                        <span>{formatCurrency((item.amount || 0) * (item.quantity || 1))}</span>
                       </div>
                       {item.description && (
                         <div 
-                          className="mt-2 text-sm text-gray-600 leading-relaxed invoice-description whitespace-pre-wrap"
-                          style={{ margin: '8px 0', fontSize: '14px', color: '#666', lineHeight: '1.4' }}
+                          className="mt-2 text-xs sm:text-sm text-gray-600 leading-relaxed invoice-description whitespace-pre-wrap"
+                          style={{ margin: '8px 0', fontSize: 'clamp(12px, 2vw, 14px)', color: '#666', lineHeight: '1.4' }}
                         >
                           {item.description}
                         </div>
@@ -292,34 +294,34 @@ export default function InvoicePreview({ setCurrentView }: InvoicePreviewProps) 
             </div>
 
             {/* Total Amount */}
-            <div className="invoice-preview-total mt-8 text-right">
-              <p className="text-lg"><strong>Nettobetrag:</strong> {formatCurrency(currentInvoice.amount)}</p>
+            <div className="invoice-preview-total mt-6 sm:mt-8 text-left sm:text-right">
+              <p className="text-base sm:text-lg"><strong>Nettobetrag:</strong> {formatCurrency(currentInvoice.amount)}</p>
               <p 
-                className="text-sm text-[var(--muted)] my-4"
-                style={{ fontSize: '14px', color: 'var(--muted)', margin: '16px 0' }}
+                className="text-xs sm:text-sm text-[var(--muted)] my-3 sm:my-4"
+                style={{ fontSize: 'clamp(12px, 2vw, 14px)', color: 'var(--muted)', margin: '12px 0' }}
               >
                 {profile.taxNotice || 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.'}
               </p>
-              <p className="text-2xl font-bold border-t border-gray-200 pt-2">
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold border-t border-gray-200 pt-2">
                 <strong>Gesamtbetrag:</strong> {formatCurrency(currentInvoice.amount)}
               </p>
             </div>
 
             {/* Payment Information */}
-            <div className="invoice-preview-payment mt-8 text-center">
-              <div className="bg-gray-100 border-3 border-black rounded-lg p-6">
-                <h3 className="text-2xl font-bold mb-4">Zahlungsinformationen</h3>
-                <p className="mb-3 text-lg text-gray-500"><strong>Zahlbar bis:</strong> {formatDate(currentInvoice.dueDate)}</p>
+            <div className="invoice-preview-payment mt-6 sm:mt-8 text-center">
+              <div className="bg-gray-100 border-3 border-black rounded-lg p-3 sm:p-6">
+                <h3 className="text-lg sm:text-xl lg:text-2xl font-bold mb-3 sm:mb-4">Zahlungsinformationen</h3>
+                <p className="mb-2 sm:mb-3 text-sm sm:text-base lg:text-lg text-gray-500"><strong>Zahlbar bis:</strong> {formatDate(currentInvoice.dueDate)}</p>
                 
                 {(profile.bankName || profile.bankIban) ? (
-                  <div style={{ marginTop: '16px' }}>
-                    <p className="mb-2 text-lg text-gray-500"><strong>Bankverbindung:</strong></p>
-                    {profile.bankName && <p className="text-lg text-gray-500">Bank: {profile.bankName}</p>}
-                    {profile.bankIban && <p className="text-lg text-gray-500">IBAN: {profile.bankIban}</p>}
-                    {profile.bankBic && <p className="text-lg text-gray-500">BIC: {profile.bankBic}</p>}
+                  <div style={{ marginTop: '12px' }}>
+                    <p className="mb-2 text-sm sm:text-base lg:text-lg text-gray-500"><strong>Bankverbindung:</strong></p>
+                    {profile.bankName && <p className="text-sm sm:text-base lg:text-lg text-gray-500">Bank: {profile.bankName}</p>}
+                    {profile.bankIban && <p className="text-sm sm:text-base lg:text-lg text-gray-500">IBAN: {profile.bankIban}</p>}
+                    {profile.bankBic && <p className="text-sm sm:text-base lg:text-lg text-gray-500">BIC: {profile.bankBic}</p>}
                   </div>
                 ) : (
-                  <p className="text-lg text-gray-500">Bitte überweisen Sie den Betrag auf unser Konto.</p>
+                  <p className="text-sm sm:text-base lg:text-lg text-gray-500">Bitte überweisen Sie den Betrag auf unser Konto.</p>
                 )}
               </div>
             </div>

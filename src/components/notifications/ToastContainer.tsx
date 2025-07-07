@@ -7,12 +7,12 @@ export default function ToastContainer() {
   const { notifications } = useNotification()
 
   return (
-    <div className="absolute bottom-13 right-7 z-50">
+    <div className="fixed top-4 right-4 z-[9998] pointer-events-none">
       {notifications.map((notification, index) => (
         <div 
           key={notification.id}
-          className="absolute bottom-0 right-0"
-          style={{ zIndex: 100 + index }}
+          className="mb-3 pointer-events-auto"
+          style={{ zIndex: 9998 + index }}
         >
           <ToastNotification notification={notification} />
         </div>

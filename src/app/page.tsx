@@ -15,6 +15,7 @@ import NoSSR from '@/components/NoSSR'
 import ModalPortal from '@/components/ModalPortal'
 import ToastContainer from '@/components/notifications/ToastContainer'
 import FeedbackModal from '@/components/FeedbackModal'
+import FloatingTabNavigation from '@/components/FloatingTabNavigation'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { useUserActivity } from '@/contexts/UserActivityContext'
 
@@ -65,7 +66,7 @@ function HomeContent() {
             <Header currentView={currentView} setCurrentView={setCurrentView} />
           </NoSSR>
           
-          <main className="p-5 flex-1 overflow-hidden flex flex-col">
+          <main className="safe-area-bottom p-3 sm:p-5 pb-20 lg:pb-3 sm:lg:pb-5 flex-1 overflow-y-auto overflow-x-hidden flex flex-col">
             <NoSSR>
               <ErrorBoundary level="component">
                 {currentView === 'dashboard' && <Dashboard setCurrentView={setCurrentView} />}
@@ -94,6 +95,12 @@ function HomeContent() {
             
             {/* Cookie Banner */}
             <CookieBanner />
+            
+            {/* Floating Tab Navigation */}
+            <FloatingTabNavigation 
+              currentView={currentView} 
+              setCurrentView={setCurrentView} 
+            />
           </ErrorBoundary>
         </NoSSR>
       </div>

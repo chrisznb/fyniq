@@ -43,29 +43,29 @@ export default function ProfileView() {
   const renderMenu = () => (
     <div className="w-full h-full flex flex-col">
       {/* Profile Header */}
-      <div className="text-center mb-8 flex-shrink-0">
-        <div className="w-20 h-20 bg-[var(--accent)] border-3 border-black rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+      <div className="text-center mb-6 sm:mb-8 flex-shrink-0">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[var(--accent)] border-3 border-black rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold mx-auto mb-3 sm:mb-4">
           {avatarLetter}
         </div>
-        <h2 className="text-2xl font-bold">{profile.companyName || 'Dein Name'}</h2>
-        <p className="text-lg text-[var(--muted)]">{profile.companyEmail || 'deine@email.de'}</p>
+        <h2 className="text-xl sm:text-2xl font-bold">{profile.companyName || 'Dein Name'}</h2>
+        <p className="text-base sm:text-lg text-[var(--muted)]">{profile.companyEmail || 'deine@email.de'}</p>
       </div>
 
       {/* Menu Sections */}
-      <div className="space-y-6 flex-1 overflow-y-auto">
-        <div className="border-3 border-black rounded-lg p-6 bg-white">
-          <h3 className="text-xl font-semibold mb-4">Profil</h3>
-          <div className="space-y-3">
+      <div className="space-y-4 sm:space-y-6 flex-1 overflow-y-auto">
+        <div className="border-3 border-black rounded-lg p-4 sm:p-6 bg-white">
+          <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Profil</h3>
+          <div className="space-y-2 sm:space-y-3">
             <button
               onClick={() => setCurrentView('edit')}
-              className="w-full flex justify-between items-center p-4 hover:bg-gray-50 rounded-lg transition-colors text-lg"
+              className="w-full flex justify-between items-center p-3 sm:p-4 hover:bg-gray-50 rounded-lg transition-colors text-base sm:text-lg"
             >
               <span>Profil bearbeiten</span>
               <span className="text-xl">→</span>
             </button>
             <button
               onClick={() => setCurrentView('settings')}
-              className="w-full flex justify-between items-center p-4 hover:bg-gray-50 rounded-lg transition-colors text-lg"
+              className="w-full flex justify-between items-center p-3 sm:p-4 hover:bg-gray-50 rounded-lg transition-colors text-base sm:text-lg"
             >
               <span>Einstellungen</span>
               <span className="text-xl">→</span>
@@ -78,21 +78,21 @@ export default function ProfileView() {
           <div className="space-y-3">
             <button
               onClick={() => setCurrentView('data')}
-              className="w-full flex justify-between items-center p-4 hover:bg-gray-50 rounded-lg transition-colors text-lg"
+              className="w-full flex justify-between items-center p-3 sm:p-4 hover:bg-gray-50 rounded-lg transition-colors text-base sm:text-lg"
             >
               <span>Datenmanagement</span>
               <span className="text-xl">→</span>
             </button>
             <Link
               href="/datenschutz"
-              className="w-full flex justify-between items-center p-4 hover:bg-gray-50 rounded-lg transition-colors text-lg"
+              className="w-full flex justify-between items-center p-3 sm:p-4 hover:bg-gray-50 rounded-lg transition-colors text-base sm:text-lg"
             >
               <span>Datenschutz</span>
               <span className="text-xl">→</span>
             </Link>
             <Link
               href="/cookies"
-              className="w-full flex justify-between items-center p-4 hover:bg-gray-50 rounded-lg transition-colors text-lg"
+              className="w-full flex justify-between items-center p-3 sm:p-4 hover:bg-gray-50 rounded-lg transition-colors text-base sm:text-lg"
             >
               <span>Cookie-Einstellungen</span>
               <span className="text-xl">→</span>
@@ -105,7 +105,7 @@ export default function ProfileView() {
           <div className="space-y-3">
             <Link
               href="/impressum"
-              className="w-full flex justify-between items-center p-4 hover:bg-gray-50 rounded-lg transition-colors text-lg"
+              className="w-full flex justify-between items-center p-3 sm:p-4 hover:bg-gray-50 rounded-lg transition-colors text-base sm:text-lg"
             >
               <span>Impressum</span>
               <span className="text-xl">→</span>
@@ -157,7 +157,7 @@ export default function ProfileView() {
               />
             </div>
             
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
               <div>
                 <label className="block text-base font-medium mb-3">PLZ</label>
                 <input

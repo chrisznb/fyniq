@@ -41,7 +41,19 @@ export function useSecureStorage<T>(
         
         if (encrypt && isEncrypted(storedValue)) {
           // Data is encrypted, decrypt it
-          parsedValue = decryptData<T>(storedValue)
+          try {
+            parsedValue = decryptData<T>(storedValue)
+          } catch (decryptError) {
+            // If decryption fails (e.g., missing key), clear the corrupted data
+            console.warn(`Could not decrypt ${key}, clearing corrupted data`)
+            localStorage.removeItem(key)
+            if (validateIntegrity) {
+              localStorage.removeItem(`${key}_hash`)
+            }
+            setValue(fallback as T)
+            setIsLoading(false)
+            return
+          }
         } else {
           // Data is not encrypted, parse normally
           parsedValue = JSON.parse(storedValue)

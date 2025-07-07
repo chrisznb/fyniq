@@ -14,6 +14,14 @@ interface CustomerModalProps {
 export default function CustomerModal({ onClose, editCustomerId }: CustomerModalProps) {
   const { customers, addCustomer, updateCustomer } = useData()
   const { showSuccess } = useNotification()
+
+  // Prevent background scroll when modal is open
+  useEffect(() => {
+    document.body.classList.add('modal-open')
+    return () => {
+      document.body.classList.remove('modal-open')
+    }
+  }, [])
   const [formData, setFormData] = useState({
     name: '',
     company: '',
@@ -81,30 +89,36 @@ export default function CustomerModal({ onClose, editCustomerId }: CustomerModal
     onClose()
   }
 
+  const handleModalClose = () => {
+    document.body.classList.remove('modal-open')
+    onClose()
+  }
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 1000, backdropFilter: 'blur(4px)', backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
-      <div className="bg-white border-3 border-black rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">
+    <div className="modal-overlay fixed inset-0 flex items-center justify-center p-2 sm:p-4" style={{ zIndex: 1000, backdropFilter: 'blur(4px)', backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
+      <div className="modal-content bg-white border-3 border-black rounded-lg p-4 sm:p-6 w-full max-w-lg max-h-[90vh] overflow-hidden shadow-2xl">
+        <div className="modal-header flex justify-between items-center mb-4 sm:mb-6 flex-shrink-0">
+          <h2 className="text-lg sm:text-2xl font-bold">
             {isEdit ? 'Kunde bearbeiten' : 'Neuer Kunde'}
           </h2>
           <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-3xl font-bold"
+            onClick={handleModalClose}
+            className="modal-close-btn text-gray-500 hover:text-gray-700 text-2xl sm:text-3xl font-bold w-8 h-8 sm:w-auto sm:h-auto flex items-center justify-center"
           >
             ×
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="modal-body overflow-y-auto flex-1">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label className="block text-sm font-medium mb-2">Name/Ansprechpartner *</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-[var(--accent)] outline-none"
+                className="modal-input w-full p-2.5 sm:p-3 border-2 border-gray-300 rounded-lg focus:border-[var(--accent)] outline-none text-base"
                 placeholder="Max Mustermann"
                 required
               />
@@ -117,7 +131,7 @@ export default function CustomerModal({ onClose, editCustomerId }: CustomerModal
                   type="text"
                   value={formData.customerNumber}
                   onChange={(e) => setFormData(prev => ({ ...prev, customerNumber: e.target.value }))}
-                  className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-[var(--accent)] outline-none"
+                  className="modal-input w-full p-2.5 sm:p-3 border-2 border-gray-300 rounded-lg focus:border-[var(--accent)] outline-none text-base"
                 />
                 {!formData.customerNumber && (
                   <div className="absolute inset-0 p-3 text-gray-400 pointer-events-none">
@@ -173,7 +187,7 @@ export default function CustomerModal({ onClose, editCustomerId }: CustomerModal
                 type="text"
                 value={formData.zip}
                 onChange={(e) => setFormData(prev => ({ ...prev, zip: e.target.value }))}
-                className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-[var(--accent)] outline-none"
+                className="modal-input w-full p-2.5 sm:p-3 border-2 border-gray-300 rounded-lg focus:border-[var(--accent)] outline-none text-base"
                 placeholder="12345"
                 required
               />
@@ -184,7 +198,7 @@ export default function CustomerModal({ onClose, editCustomerId }: CustomerModal
                 type="text"
                 value={formData.city}
                 onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-[var(--accent)] outline-none"
+                className="modal-input w-full p-2.5 sm:p-3 border-2 border-gray-300 rounded-lg focus:border-[var(--accent)] outline-none text-base"
                 placeholder="Musterstadt"
                 required
               />
@@ -202,22 +216,23 @@ export default function CustomerModal({ onClose, editCustomerId }: CustomerModal
             />
           </div>
 
-          <div className="flex gap-4 pt-6">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-6 py-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 font-semibold"
-            >
-              Abbrechen
-            </button>
-            <button
-              type="submit"
-              className="flex-1 px-6 py-3 bg-[var(--accent)] border-3 border-black rounded-lg font-semibold hover:shadow-lg transition-all"
-            >
-              {isEdit ? 'Aktualisieren' : 'Erstellen'}
-            </button>
-          </div>
-        </form>
+            <div className="modal-footer flex flex-row gap-3 sm:gap-4 pt-4 sm:pt-6 flex-shrink-0">
+              <button
+                type="button"
+                onClick={handleModalClose}
+                className="modal-button flex-1 px-4 sm:px-6 py-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 font-semibold text-sm sm:text-base"
+              >
+                Abbrechen
+              </button>
+              <button
+                type="submit"
+                className="modal-button flex-1 px-4 sm:px-6 py-3 bg-[var(--accent)] border-3 border-black rounded-lg font-semibold hover:shadow-lg transition-all text-sm sm:text-base"
+              >
+                {isEdit ? 'Aktualisieren' : 'Erstellen'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   )

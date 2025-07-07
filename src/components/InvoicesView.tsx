@@ -140,22 +140,22 @@ export default function InvoicesView({ setCurrentView }: InvoicesViewProps) {
   if (invoices.length === 0) {
     return (
       <>
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Alle Rechnungen</h1>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Alle Rechnungen</h1>
           <button 
             onClick={() => openModal('invoice')}
-            className="px-6 py-3 bg-[var(--accent)] border-3 border-black rounded-lg font-semibold hover:shadow-lg transition-all"
+            className="px-4 py-2 sm:px-6 sm:py-3 bg-[var(--accent)] border-3 border-black rounded-lg font-semibold hover:shadow-lg transition-all text-sm sm:text-base"
           >
             + Neue Rechnung
           </button>
         </div>
         
-        <div className="border-3 border-black rounded-lg p-12 bg-white text-center">
-          <h3 className="text-xl font-semibold mb-4">Noch keine Rechnungen</h3>
-          <p className="text-[var(--muted)] mb-6">Erstelle deine erste Rechnung und werde schneller bezahlt.</p>
+        <div className="border-3 border-black rounded-lg p-6 sm:p-8 lg:p-12 bg-white text-center">
+          <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Noch keine Rechnungen</h3>
+          <p className="text-sm sm:text-base text-[var(--muted)] mb-4 sm:mb-6">Erstelle deine erste Rechnung und werde schneller bezahlt.</p>
           <button 
             onClick={() => openModal('invoice')}
-            className="px-6 py-3 bg-[var(--accent)] border-3 border-black rounded-lg font-semibold hover:shadow-lg transition-all"
+            className="px-4 py-2 sm:px-6 sm:py-3 bg-[var(--accent)] border-3 border-black rounded-lg font-semibold hover:shadow-lg transition-all text-sm sm:text-base"
           >
             Erste Rechnung erstellen
           </button>
@@ -167,25 +167,25 @@ export default function InvoicesView({ setCurrentView }: InvoicesViewProps) {
   return (
     <>
       <div className="flex flex-col h-full overflow-hidden">
-        <div className="flex justify-between items-center mb-6 flex-shrink-0">
-          <h1 className="text-3xl font-bold">Alle Rechnungen</h1>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6 flex-shrink-0">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Alle Rechnungen</h1>
           <button 
             onClick={() => openModal('invoice')}
-            className="px-6 py-3 bg-[var(--accent)] border-3 border-black rounded-lg font-semibold hover:shadow-lg transition-all"
+            className="px-4 py-2 sm:px-6 sm:py-3 bg-[var(--accent)] border-3 border-black rounded-lg font-semibold hover:shadow-lg transition-all text-sm sm:text-base"
           >
             + Neue Rechnung
           </button>
         </div>
 
         {/* Search and Sort Bar */}
-        <div className="flex gap-4 mb-6 flex-shrink-0">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6 flex-shrink-0">
           <div className="flex-1">
             <input
               type="text"
               placeholder="Rechnungen durchsuchen..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-[var(--accent)] outline-none"
+              className="w-full p-2.5 sm:p-3 border-2 border-gray-300 rounded-lg focus:border-[var(--accent)] outline-none text-sm sm:text-base"
             />
           </div>
           <div className="relative">
@@ -196,7 +196,7 @@ export default function InvoicesView({ setCurrentView }: InvoicesViewProps) {
                 setSortBy(field)
                 setSortOrder(order)
               }}
-              className="p-3 border-2 border-gray-300 rounded-lg focus:border-[var(--accent)] outline-none bg-white"
+              className="p-2.5 sm:p-3 border-2 border-gray-300 rounded-lg focus:border-[var(--accent)] outline-none bg-white text-sm sm:text-base w-full sm:w-auto"
             >
               <option value="date-desc">Datum (Neueste zuerst)</option>
               <option value="date-asc">Datum (Älteste zuerst)</option>
@@ -281,17 +281,17 @@ export default function InvoicesView({ setCurrentView }: InvoicesViewProps) {
         </div>
 
         {/* Mobile Card View */}
-        <div className="lg:hidden flex-1 overflow-auto space-y-4">
+        <div className="lg:hidden flex-1 overflow-auto space-y-3 pb-4">
           {filteredAndSortedInvoices.map((invoice) => (
-            <div key={invoice.id} className="border-3 border-black rounded-lg p-4 bg-white">
+            <div key={invoice.id} className="border-3 border-black rounded-lg p-3 sm:p-4 bg-white">
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <h3 className="font-bold text-lg">{invoice.number}</h3>
-                  <p className="text-[var(--muted)]">{invoice.customerName}</p>
+                  <h3 className="font-bold text-base sm:text-lg">{invoice.number}</h3>
+                  <p className="text-sm text-[var(--muted)]">{invoice.customerName}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-lg">{formatCurrency(invoice.amount)}</p>
-                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                  <p className="font-bold text-base sm:text-lg">{formatCurrency(invoice.amount)}</p>
+                  <span className={`inline-block px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs font-medium ${
                     invoice.paid 
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-yellow-100 text-yellow-800'
@@ -301,7 +301,7 @@ export default function InvoicesView({ setCurrentView }: InvoicesViewProps) {
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4 text-xs sm:text-sm">
                 <div>
                   <span className="text-[var(--muted)]">Datum:</span>
                   <br />
@@ -314,34 +314,34 @@ export default function InvoicesView({ setCurrentView }: InvoicesViewProps) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 mb-3">
+              <div className="grid grid-cols-2 gap-2 mb-2 sm:mb-3">
                 <button
                   onClick={() => handleViewInvoice(invoice.id)}
-                  className="px-4 py-2 bg-[var(--accent)] text-black border-3 border-black rounded-lg font-medium hover:bg-[var(--accent)]/80 transition-colors"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--accent)] text-black border-3 border-black rounded-lg font-medium hover:bg-[var(--accent)]/80 transition-colors text-sm"
                 >
                   Ansehen
                 </button>
                 <button
                   onClick={() => handleEditInvoice(invoice.id)}
-                  className="px-4 py-2 bg-[var(--accent)] text-black border-3 border-black rounded-lg font-medium hover:bg-[var(--accent)]/80 transition-colors"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--accent)] text-black border-3 border-black rounded-lg font-medium hover:bg-[var(--accent)]/80 transition-colors text-sm"
                 >
                   Bearbeiten
                 </button>
                 <button
                   onClick={() => handleDuplicateInvoice(invoice.id)}
-                  className="px-4 py-2 bg-[var(--accent)] text-black border-3 border-black rounded-lg font-medium hover:bg-[var(--accent)]/80 transition-colors"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--accent)] text-black border-3 border-black rounded-lg font-medium hover:bg-[var(--accent)]/80 transition-colors text-sm"
                 >
                   Duplizieren
                 </button>
                 <button
                   onClick={() => handleDeleteInvoice(invoice.id)}
-                  className="px-4 py-2 bg-red-100 text-black border-3 border-black rounded-lg font-medium hover:bg-red-200 transition-colors"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-100 text-black border-3 border-black rounded-lg font-medium hover:bg-red-200 transition-colors text-sm"
                 >
                   ⌫
                 </button>
               </div>
               <div className="flex gap-2">
-                <label className="flex items-center gap-2 px-4 py-2 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 flex-1">
+                <label className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 flex-1">
                   <input
                     type="checkbox"
                     checked={invoice.paid}
