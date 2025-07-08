@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { encryptData, decryptData, isEncrypted, generateDataHash, verifyDataIntegrity } from '@/utils/encryption'
+import { encryptData, decryptData, isEncrypted, generateDataHash, verifyDataIntegrity, isValidEncryptedFormat } from '@/utils/encryption'
 
 /**
  * Custom hook for secure localStorage operations with encryption
@@ -40,12 +40,24 @@ export function useSecureStorage<T>(
         let parsedValue: T
         
         if (encrypt && isEncrypted(storedValue)) {
-          // Data is encrypted, decrypt it
+          // Data is encrypted, validate format and decrypt it
+          if (!isValidEncryptedFormat(storedValue)) {
+            console.warn(`Invalid encrypted data format for ${key}, clearing corrupted data`)
+            localStorage.removeItem(key)
+            if (validateIntegrity) {
+              localStorage.removeItem(`${key}_hash`)
+            }
+            setValue(fallback as T)
+            setIsLoading(false)
+            return
+          }
+          
           try {
             parsedValue = decryptData<T>(storedValue)
-          } catch {
-            // If decryption fails (e.g., missing key), clear the corrupted data
-            console.warn(`Could not decrypt ${key}, clearing corrupted data`)
+          } catch (error) {
+            // If decryption fails (e.g., missing key, malformed UTF-8), clear the corrupted data
+            console.warn(`Could not decrypt ${key}:`, error instanceof Error ? error.message : 'Unknown error')
+            console.warn(`Clearing corrupted data for ${key}`)
             localStorage.removeItem(key)
             if (validateIntegrity) {
               localStorage.removeItem(`${key}_hash`)
@@ -147,7 +159,21 @@ export function useSecureStorageMultiple<T extends Record<string, unknown>>(
           const storedValue = localStorage.getItem(key as string)
           if (storedValue !== null) {
             if (options.encrypt && isEncrypted(storedValue)) {
-              loadedValues[key] = decryptData(storedValue)
+              if (!isValidEncryptedFormat(storedValue)) {
+                console.warn(`Invalid encrypted data format for ${key as string}, using fallback`)
+                localStorage.removeItem(key as string)
+                loadedValues[key] = initialValues[key]
+                continue
+              }
+              
+              try {
+                loadedValues[key] = decryptData(storedValue)
+              } catch (decryptError) {
+                console.warn(`Could not decrypt ${key as string}:`, decryptError instanceof Error ? decryptError.message : 'Unknown error')
+                console.warn(`Clearing corrupted data for ${key as string}`)
+                localStorage.removeItem(key as string)
+                loadedValues[key] = initialValues[key]
+              }
             } else {
               loadedValues[key] = JSON.parse(storedValue)
             }

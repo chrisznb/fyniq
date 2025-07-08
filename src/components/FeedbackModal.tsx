@@ -207,12 +207,12 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center p-4 z-50" style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
+    <div className="fixed inset-0 flex items-center justify-center sm:items-center sm:justify-center items-start justify-center pt-4 sm:pt-0 p-4 z-50" style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
       <div 
         className={`
           transform transition-all duration-300 ease-out
           ${isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}
-          bg-white border-3 border-black rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto
+          bg-white border-3 border-black rounded-lg p-4 sm:p-6 w-full max-w-2xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto
           shadow-2xl
         `}
       >

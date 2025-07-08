@@ -96,8 +96,8 @@ export default function CustomerModal({ onClose, editCustomerId }: CustomerModal
 
   return (
     <div className="modal-overlay fixed inset-0 flex items-center justify-center p-2 sm:p-4" style={{ zIndex: 1000, backdropFilter: 'blur(4px)', backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
-      <div className="modal-content bg-white border-3 border-black rounded-lg p-4 sm:p-6 w-full max-w-lg max-h-[90vh] overflow-hidden shadow-2xl">
-        <div className="modal-header flex justify-between items-center mb-4 sm:mb-6 flex-shrink-0">
+      <div className="modal-content bg-white border-3 border-black rounded-lg p-4 sm:p-6 w-full max-w-lg shadow-2xl">
+        <div className="modal-header flex justify-between items-center mb-4 sm:mb-6">
           <h2 className="text-lg sm:text-2xl font-bold">
             {isEdit ? 'Kunde bearbeiten' : 'Neuer Kunde'}
           </h2>
@@ -109,7 +109,7 @@ export default function CustomerModal({ onClose, editCustomerId }: CustomerModal
           </button>
         </div>
 
-        <div className="modal-body overflow-y-auto flex-1">
+        <div className="modal-body">
           <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
@@ -216,7 +216,7 @@ export default function CustomerModal({ onClose, editCustomerId }: CustomerModal
             />
           </div>
 
-            <div className="modal-footer flex flex-row gap-3 sm:gap-4 pt-4 sm:pt-6 flex-shrink-0">
+            <div className="modal-footer flex flex-row gap-3 sm:gap-4 pt-4 sm:pt-6">
               <button
                 type="button"
                 onClick={handleModalClose}

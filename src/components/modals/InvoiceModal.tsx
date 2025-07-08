@@ -155,8 +155,8 @@ export default function InvoiceModal({ onClose, editInvoiceId }: InvoiceModalPro
 
   return (
     <div className="modal-overlay fixed inset-0 flex items-center justify-center p-2 sm:p-4" style={{ zIndex: 1000, backdropFilter: 'blur(4px)', backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
-      <div className="modal-content bg-white border-3 border-black rounded-lg p-4 sm:p-6 w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl">
-        <div className="modal-header flex justify-between items-center mb-4 sm:mb-6 flex-shrink-0">
+      <div className="modal-content bg-white border-3 border-black rounded-lg p-4 sm:p-6 w-full max-w-4xl shadow-2xl">
+        <div className="modal-header flex justify-between items-center mb-4 sm:mb-6">
           <h2 className="text-lg sm:text-2xl font-bold">{isEdit ? 'Rechnung bearbeiten' : 'Neue Rechnung erstellen'}</h2>
           <button
             onClick={handleModalClose}
@@ -166,7 +166,7 @@ export default function InvoiceModal({ onClose, editInvoiceId }: InvoiceModalPro
           </button>
         </div>
 
-        <div className="modal-body overflow-y-auto flex-1">
+        <div className="modal-body">
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {/* Basic Info */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
@@ -356,7 +356,7 @@ export default function InvoiceModal({ onClose, editInvoiceId }: InvoiceModalPro
           </div>
 
             {/* Submit Buttons */}
-            <div className="modal-footer flex flex-row gap-3 sm:gap-4 pt-4 sm:pt-6 flex-shrink-0 justify-center">
+            <div className="modal-footer flex flex-row gap-3 sm:gap-4 pt-4 sm:pt-6 justify-center">
               <button
                 type="button"
                 onClick={handleModalClose}

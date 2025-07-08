@@ -36,10 +36,10 @@ export default function RecentInvoices({ setCurrentView }: RecentInvoicesProps) 
     }
   }
 
-  // Get latest 5 invoices
+  // Get latest 3 invoices for PC (was 5)
   const recentInvoices = invoices
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 5)
+    .slice(0, 3)
 
   if (recentInvoices.length === 0) {
     return (
@@ -58,37 +58,77 @@ export default function RecentInvoices({ setCurrentView }: RecentInvoicesProps) 
 
   return (
     <div className="space-y-3 overflow-y-auto h-full">
-      {recentInvoices.map((invoice) => (
-        <div
-          key={invoice.id}
-          className="border border-gray-200 rounded-lg p-3 lg:p-4 hover:shadow-md transition-shadow cursor-pointer flex-shrink-0"
-          onClick={() => {
-            setCurrentInvoice(invoice)
-            setCurrentView('invoice-preview')
-          }}
-        >
-          <div className="flex justify-between items-start mb-2">
-            <div className="min-w-0 flex-1">
-              <h4 className="font-semibold text-sm lg:text-base truncate">{invoice.number}</h4>
-              <p className="text-xs lg:text-sm text-[var(--muted)] truncate">{invoice.customerName}</p>
+      {/* PC: Show 2 invoices initially, 3rd on scroll */}
+      <div className="hidden md:block">
+        <div className="space-y-3 h-[240px] overflow-y-auto">
+          {recentInvoices.map((invoice) => (
+            <div
+              key={invoice.id}
+              className="border border-gray-200 rounded-lg p-3 lg:p-4 hover:shadow-md transition-shadow cursor-pointer flex-shrink-0"
+              onClick={() => {
+                setCurrentInvoice(invoice)
+                setCurrentView('invoice-preview')
+              }}
+            >
+              <div className="flex justify-between items-start mb-2">
+                <div className="min-w-0 flex-1">
+                  <h4 className="font-semibold text-sm lg:text-base truncate">{invoice.number}</h4>
+                  <p className="text-xs lg:text-sm text-[var(--muted)] truncate">{invoice.customerName}</p>
+                </div>
+                <div className="text-right ml-2 flex-shrink-0">
+                  <p className="font-bold text-sm lg:text-base mb-2">{formatCurrency(invoice.amount)}</p>
+                  <span 
+                    className={`inline-block px-2 py-1 rounded text-xs font-medium cursor-pointer transition-colors ${
+                      invoice.paid 
+                        ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                        : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                    }`}
+                    onClick={(e) => handleTogglePaid(invoice.id, e)}
+                  >
+                    {invoice.paid ? 'Bezahlt' : 'Ausstehend'}
+                  </span>
+                </div>
+              </div>
+              <p className="text-xs lg:text-sm text-[var(--muted)]">{formatDate(invoice.date)}</p>
             </div>
-            <div className="text-right ml-2 flex-shrink-0">
-              <p className="font-bold text-sm lg:text-base mb-2">{formatCurrency(invoice.amount)}</p>
-              <span 
-                className={`inline-block px-2 py-1 rounded text-xs font-medium cursor-pointer transition-colors ${
-                  invoice.paid 
-                    ? 'bg-green-100 text-green-800 hover:bg-green-200' 
-                    : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-                }`}
-                onClick={(e) => handleTogglePaid(invoice.id, e)}
-              >
-                {invoice.paid ? 'Bezahlt' : 'Ausstehend'}
-              </span>
-            </div>
-          </div>
-          <p className="text-xs lg:text-sm text-[var(--muted)]">{formatDate(invoice.date)}</p>
+          ))}
         </div>
-      ))}
+      </div>
+      
+      {/* Mobile: Show all with normal scrolling */}
+      <div className="md:hidden space-y-3">
+        {recentInvoices.map((invoice) => (
+          <div
+            key={invoice.id}
+            className="border border-gray-200 rounded-lg p-3 lg:p-4 hover:shadow-md transition-shadow cursor-pointer flex-shrink-0"
+            onClick={() => {
+              setCurrentInvoice(invoice)
+              setCurrentView('invoice-preview')
+            }}
+          >
+            <div className="flex justify-between items-start mb-2">
+              <div className="min-w-0 flex-1">
+                <h4 className="font-semibold text-sm lg:text-base truncate">{invoice.number}</h4>
+                <p className="text-xs lg:text-sm text-[var(--muted)] truncate">{invoice.customerName}</p>
+              </div>
+              <div className="text-right ml-2 flex-shrink-0">
+                <p className="font-bold text-sm lg:text-base mb-2">{formatCurrency(invoice.amount)}</p>
+                <span 
+                  className={`inline-block px-2 py-1 rounded text-xs font-medium cursor-pointer transition-colors ${
+                    invoice.paid 
+                      ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                      : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                  }`}
+                  onClick={(e) => handleTogglePaid(invoice.id, e)}
+                >
+                  {invoice.paid ? 'Bezahlt' : 'Ausstehend'}
+                </span>
+              </div>
+            </div>
+            <p className="text-xs lg:text-sm text-[var(--muted)]">{formatDate(invoice.date)}</p>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

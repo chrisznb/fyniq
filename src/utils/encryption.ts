@@ -58,19 +58,49 @@ export const encryptData = (data: unknown): string => {
  */
 export const decryptData = <T = unknown>(encryptedData: string): T => {
   try {
+    // Validate encrypted data format first
+    if (!isValidEncryptedFormat(encryptedData)) {
+      throw new Error('Invalid encrypted data format')
+    }
+    
     const key = getEncryptionKey()
     const decrypted = CryptoJS.AES.decrypt(encryptedData, key)
-    const decryptedString = decrypted.toString(CryptoJS.enc.Utf8)
+    
+    let decryptedString: string
+    try {
+      decryptedString = decrypted.toString(CryptoJS.enc.Utf8)
+    } catch {
+      throw new Error('Malformed UTF-8 data - encryption key mismatch or corrupted data')
+    }
     
     if (!decryptedString) {
       throw new Error('Failed to decrypt data - invalid key or corrupted data')
     }
     
-    return JSON.parse(decryptedString)
+    try {
+      return JSON.parse(decryptedString)
+    } catch {
+      throw new Error('Decrypted data is not valid JSON')
+    }
   } catch (error) {
     console.error('Decryption failed:', error)
-    throw new Error('Failed to decrypt data')
+    throw error
   }
+}
+
+/**
+ * Validate encrypted data format
+ * @param data - Data to validate
+ * @returns True if data appears to be valid encrypted format
+ */
+export const isValidEncryptedFormat = (data: string): boolean => {
+  if (!data || typeof data !== 'string') {
+    return false
+  }
+  
+  // CryptoJS encrypted data should be base64 encoded
+  const base64Pattern = /^[A-Za-z0-9+/]*={0,2}$/
+  return base64Pattern.test(data) && data.length > 0
 }
 
 /**
@@ -84,8 +114,8 @@ export const isEncrypted = (data: string): boolean => {
     JSON.parse(data)
     return false
   } catch {
-    // If JSON parsing fails, assume it's encrypted
-    return true
+    // If JSON parsing fails, check if it's valid encrypted format
+    return isValidEncryptedFormat(data)
   }
 }
 
@@ -121,4 +151,49 @@ export const verifyDataIntegrity = (data: unknown, expectedHash: string): boolea
     console.error('Data integrity verification failed:', error)
     return false
   }
+}
+
+/**
+ * Migrate corrupted localStorage entries by clearing them and returning default values
+ * @param keys - Array of localStorage keys to check and migrate
+ * @returns Object with migration results
+ */
+export const migrateCorruptedData = (keys: string[]): { 
+  cleared: string[], 
+  errors: string[] 
+} => {
+  const cleared: string[] = []
+  const errors: string[] = []
+  
+  if (typeof window === 'undefined') {
+    errors.push('Migration can only be run in browser environment')
+    return { cleared, errors }
+  }
+
+  keys.forEach(key => {
+    try {
+      const storedValue = localStorage.getItem(key)
+      if (storedValue) {
+        // Check if it's supposed to be encrypted but format is invalid
+        if (isEncrypted(storedValue) && !isValidEncryptedFormat(storedValue)) {
+          localStorage.removeItem(key)
+          localStorage.removeItem(`${key}_hash`)
+          cleared.push(key)
+        } else if (isEncrypted(storedValue)) {
+          // Try to decrypt to check if it's corrupted
+          try {
+            decryptData(storedValue)
+          } catch {
+            localStorage.removeItem(key)
+            localStorage.removeItem(`${key}_hash`)
+            cleared.push(key)
+          }
+        }
+      }
+    } catch (error) {
+      errors.push(`Error migrating ${key}: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  })
+
+  return { cleared, errors }
 }
