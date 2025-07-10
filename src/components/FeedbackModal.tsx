@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Star, Send, Heart, X, MessageCircle, Mail, Lightbulb, Clock, Ban } from 'lucide-react'
 import { useUserActivity } from '@/contexts/UserActivityContext'
+import { useForm } from '@formspree/react'
 
 interface FeedbackModalProps {
   isOpen: boolean
@@ -18,6 +19,7 @@ interface FeedbackData {
   recommendation: string
   email: string
   comments: string
+  privacyAccepted: boolean
 }
 
 export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
@@ -31,8 +33,7 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
   } = useUserActivity()
   
   const [isVisible, setIsVisible] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [showThankYou, setShowThankYou] = useState(false)
   const [formData, setFormData] = useState<FeedbackData>({
     rating: 0,
     usage: '',
@@ -41,22 +42,27 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
     improvements: '',
     recommendation: '',
     email: '',
-    comments: ''
+    comments: '',
+    privacyAccepted: false
   })
   const [errors, setErrors] = useState<{[key: string]: string}>({})
+  
+  // Formspree hook mit deiner Form ID
+  const [state, handleFormspreeSubmit] = useForm("mldnyygb")
 
   useEffect(() => {
     if (isOpen) {
       setIsVisible(true)
+      // Reset showThankYou when modal opens
+      setShowThankYou(false)
     }
   }, [isOpen])
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     onClose()
     
     // Reset form after closing
     setTimeout(() => {
-      setIsSubmitted(false)
       setFormData({
         rating: 0,
         usage: '',
@@ -65,11 +71,14 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
         improvements: '',
         recommendation: '',
         email: '',
-        comments: ''
+        comments: '',
+        privacyAccepted: false
       })
       setErrors({})
+      setIsVisible(false)
+      setShowThankYou(false) // Reset thank you state
     }, 300)
-  }
+  }, [onClose])
 
   const handleRemindLater = () => {
     onRemindLater()
@@ -104,33 +113,102 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
       newErrors['email'] = 'Bitte gib eine gültige E-Mail-Adresse ein'
     }
     
+    if (!formData.privacyAccepted) {
+      newErrors['privacyAccepted'] = 'Bitte bestätige die Datenschutzerklärung'
+    }
+    
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     
     if (!validateForm()) {
       return
     }
     
-    setIsSubmitting(true)
+    // Erstelle eine neue FormData mit lesbaren deutschen Labels
+    const formDataToSubmit = new FormData()
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    // Hauptbewertung
+    formDataToSubmit.append('⭐ Gesamtbewertung', `${formData.rating} von 5 Sternen`)
     
-    setIsSubmitting(false)
-    setIsSubmitted(true)
+    // Nutzungshäufigkeit
+    const usageLabels: {[key: string]: string} = {
+      'daily': 'Täglich',
+      'weekly': 'Wöchentlich', 
+      'occasionally': 'Gelegentlich',
+      'no': 'Nein'
+    }
+    formDataToSubmit.append('📅 Würde regelmäßig nutzen', usageLabels[formData.usage] || formData.usage)
     
-    // Mark feedback as given in context
-    onFeedbackSubmitted()
+    // Preismodell
+    const pricingLabels: {[key: string]: string} = {
+      'free-ads': 'Kostenlos mit Werbung',
+      'one-time': 'Einmalig €29-49',
+      'subscription': 'Abo €9/Monat',
+      'freemium': 'Freemium (Basis kostenlos, Premium kostenpflichtig)',
+      'pay-per-use': 'Pay-per-use (pro Rechnung bezahlen)'
+    }
+    formDataToSubmit.append('💰 Bevorzugtes Preismodell', pricingLabels[formData.pricing] || formData.pricing)
     
-    // Auto-close after 3 seconds
-    setTimeout(() => {
-      handleClose()
-    }, 3000)
+    // Empfehlung
+    const recommendationLabels: {[key: string]: string} = {
+      'yes': 'Ja, auf jeden Fall',
+      'probably': 'Wahrscheinlich ja',
+      'maybe': 'Vielleicht',
+      'no': 'Nein'
+    }
+    formDataToSubmit.append('👍 Würde weiterempfehlen', recommendationLabels[formData.recommendation] || formData.recommendation)
+    
+    // Textfelder
+    if (formData.missingFeatures) {
+      formDataToSubmit.append('🔧 Vermisste Features', formData.missingFeatures)
+    }
+    
+    if (formData.improvements) {
+      formDataToSubmit.append('💡 Verbesserungsvorschläge', formData.improvements)
+    }
+    
+    if (formData.email) {
+      formDataToSubmit.append('📧 E-Mail-Adresse', formData.email)
+    }
+    
+    if (formData.comments) {
+      formDataToSubmit.append('💬 Weitere Anmerkungen', formData.comments)
+    }
+    
+    // Nur minimale, anonyme Metadaten
+    formDataToSubmit.append('--- KONTEXT ---', '---')
+    
+    // Zeitstempel nur mit Datum (ohne Uhrzeit für mehr Anonymität)
+    const date = new Date()
+    const germanDate = date.toLocaleDateString('de-DE', {
+      month: '2-digit', 
+      year: 'numeric'
+    })
+    formDataToSubmit.append('📅 Feedback-Monat', germanDate)
+    
+    // Nutze Formspree handleSubmit
+    await handleFormspreeSubmit(formDataToSubmit)
   }
+  
+  // Reagiere auf erfolgreiche Submission
+  useEffect(() => {
+    if (state.succeeded && !showThankYou) {
+      // Show thank you message
+      setShowThankYou(true)
+      
+      // Mark feedback as given in context
+      onFeedbackSubmitted()
+      
+      // Auto-close after 3 seconds
+      setTimeout(() => {
+        handleClose()
+      }, 3000)
+    }
+  }, [state.succeeded, showThankYou, onFeedbackSubmitted, handleClose])
 
   const handleRating = (rating: number) => {
     setFormData(prev => ({ ...prev, rating }))
@@ -147,6 +225,9 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
   }
 
   if (!isOpen) return null
+  
+  // Zeige Erfolgsmeldung wenn Feedback gesendet wurde
+  const isSubmitted = showThankYou
 
   const getTriggerMessage = () => {
     switch (feedbackTrigger) {
@@ -180,7 +261,7 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
 
   if (isSubmitted) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center p-4 z-50" style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
+      <div className="fixed inset-0 flex items-center justify-center p-4 z-[60]" style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
         <div 
           className={`
             transform transition-all duration-300 ease-out
@@ -207,7 +288,7 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center sm:items-center sm:justify-center items-start justify-center pt-4 sm:pt-0 p-4 z-50" style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
+    <div className="fixed inset-0 flex items-center justify-center sm:items-center sm:justify-center items-start justify-center pt-4 sm:pt-0 p-4 z-[60]" style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
       <div 
         className={`
           transform transition-all duration-300 ease-out
@@ -247,6 +328,7 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
             <label className="block text-sm font-medium mb-3">
               Wie bewertest du fyniq insgesamt? <span className="text-red-500">*</span>
             </label>
+            <input type="hidden" name="rating" value={formData.rating} />
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -342,6 +424,7 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
               Welche Features vermisst du?
             </label>
             <textarea
+              name="missingFeatures"
               value={formData.missingFeatures}
               onChange={(e) => setFormData(prev => ({ ...prev, missingFeatures: e.target.value }))}
               className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-[var(--accent)] outline-none resize-none"
@@ -356,6 +439,7 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
               Was könnte man verbessern?
             </label>
             <textarea
+              name="improvements"
               value={formData.improvements}
               onChange={(e) => setFormData(prev => ({ ...prev, improvements: e.target.value }))}
               className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-[var(--accent)] outline-none resize-none"
@@ -402,6 +486,7 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
             </label>
             <input
               type="email"
+              name="email"
               value={formData.email}
               onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
               className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-[var(--accent)] outline-none"
@@ -422,12 +507,38 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
               Sonstige Anmerkungen
             </label>
             <textarea
+              name="comments"
               value={formData.comments}
               onChange={(e) => setFormData(prev => ({ ...prev, comments: e.target.value }))}
               className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-[var(--accent)] outline-none resize-none"
               placeholder="Alles was dir sonst noch wichtig ist..."
               rows={3}
             />
+          </div>
+
+          {/* Privacy Checkbox */}
+          <div className="border-t border-gray-200 pt-4">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.privacyAccepted}
+                onChange={(e) => {
+                  setFormData(prev => ({ ...prev, privacyAccepted: e.target.checked }))
+                  if (errors['privacyAccepted']) {
+                    setErrors(prev => ({ ...prev, privacyAccepted: '' }))
+                  }
+                }}
+                className="w-5 h-5 mt-0.5 text-black focus:ring-[var(--accent)] focus:ring-2 rounded border-2 border-gray-300 cursor-pointer flex-shrink-0"
+              />
+              <span className="text-sm text-gray-700">
+                Ich bin damit einverstanden, dass meine Angaben zur Verbesserung von fyniq 
+                gespeichert und verarbeitet werden. Die Daten werden nur für diesen Zweck 
+                verwendet und nicht an Dritte weitergegeben. <span className="text-red-500">*</span>
+              </span>
+            </label>
+            {errors['privacyAccepted'] && (
+              <p className="text-red-500 text-sm mt-2 ml-8">{errors['privacyAccepted']}</p>
+            )}
           </div>
 
           {/* Reminder Options */}
@@ -466,10 +577,10 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={state.submitting}
               className="flex-1 px-6 py-3 bg-[var(--accent)] border-3 border-black rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {isSubmitting ? (
+              {state.submitting ? (
                 <>
                   <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
                   Wird gesendet...

@@ -15,6 +15,10 @@ export default function RecentInvoices({ setCurrentView }: RecentInvoicesProps) 
   const { openModal } = useModal()
   const { showSuccess, showWarning } = useNotification()
 
+  const isOverdue = (dueDate: string) => {
+    return new Date(dueDate) < new Date() && new Date(dueDate).toDateString() !== new Date().toDateString()
+  }
+
   const handleTogglePaid = (invoiceId: number, e: React.MouseEvent) => {
     e.stopPropagation() // Prevent triggering the invoice preview
     const invoice = invoices.find(inv => inv.id === invoiceId)
@@ -81,11 +85,13 @@ export default function RecentInvoices({ setCurrentView }: RecentInvoicesProps) 
                     className={`inline-block px-2 py-1 rounded text-xs font-medium cursor-pointer transition-colors ${
                       invoice.paid 
                         ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                        : !invoice.paid && isOverdue(invoice.dueDate)
+                        ? 'bg-red-100 text-red-800 hover:bg-red-200'
                         : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
                     }`}
                     onClick={(e) => handleTogglePaid(invoice.id, e)}
                   >
-                    {invoice.paid ? 'Bezahlt' : 'Ausstehend'}
+                    {invoice.paid ? 'Bezahlt' : isOverdue(invoice.dueDate) ? 'Überfällig' : 'Ausstehend'}
                   </span>
                 </div>
               </div>
@@ -117,11 +123,13 @@ export default function RecentInvoices({ setCurrentView }: RecentInvoicesProps) 
                   className={`inline-block px-2 py-1 rounded text-xs font-medium cursor-pointer transition-colors ${
                     invoice.paid 
                       ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                      : !invoice.paid && isOverdue(invoice.dueDate)
+                      ? 'bg-red-100 text-red-800 hover:bg-red-200'
                       : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
                   }`}
                   onClick={(e) => handleTogglePaid(invoice.id, e)}
                 >
-                  {invoice.paid ? 'Bezahlt' : 'Ausstehend'}
+                  {invoice.paid ? 'Bezahlt' : isOverdue(invoice.dueDate) ? 'Überfällig' : 'Ausstehend'}
                 </span>
               </div>
             </div>

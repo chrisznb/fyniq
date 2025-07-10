@@ -18,6 +18,8 @@ import FeedbackModal from '@/components/FeedbackModal'
 import FloatingTabNavigation from '@/components/FloatingTabNavigation'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { useUserActivity } from '@/contexts/UserActivityContext'
+import { useConsent } from '@/contexts/ConsentContext'
+import { ViewType } from '@/types'
 
 function IntelligentFeedbackModal() {
   const { shouldShowFeedback, hideFeedbackModal } = useUserActivity()
@@ -26,6 +28,25 @@ function IntelligentFeedbackModal() {
     <FeedbackModal 
       isOpen={shouldShowFeedback} 
       onClose={hideFeedbackModal} 
+    />
+  )
+}
+
+function FloatingTabNavigationWrapper({ currentView, setCurrentView, showOnboarding }: { 
+  currentView: ViewType
+  setCurrentView: (view: ViewType) => void
+  showOnboarding: boolean 
+}) {
+  const { showBanner } = useConsent()
+  const { shouldShowFeedback } = useUserActivity()
+  
+  return (
+    <FloatingTabNavigation 
+      currentView={currentView} 
+      setCurrentView={setCurrentView}
+      showOnboarding={showOnboarding}
+      showCookieBanner={showBanner}
+      showFeedbackModal={shouldShowFeedback}
     />
   )
 }
@@ -97,9 +118,10 @@ function HomeContent() {
             <CookieBanner />
             
             {/* Floating Tab Navigation */}
-            <FloatingTabNavigation 
+            <FloatingTabNavigationWrapper 
               currentView={currentView} 
-              setCurrentView={setCurrentView} 
+              setCurrentView={setCurrentView}
+              showOnboarding={showOnboarding}
             />
           </ErrorBoundary>
         </NoSSR>

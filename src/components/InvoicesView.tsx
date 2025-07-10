@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useData } from '@/contexts/DataContext'
 import { useModal } from '@/contexts/ModalContext'
 import { useNotification } from '@/contexts/NotificationContext'
-import { ViewType } from '@/types'
+import { ViewType, Invoice } from '@/types'
 import { formatCurrency, formatDate } from '@/utils/helpers'
 import ConfirmDialog from './notifications/ConfirmDialog'
 
@@ -13,7 +13,7 @@ interface InvoicesViewProps {
 }
 
 export default function InvoicesView({ setCurrentView }: InvoicesViewProps) {
-  const { invoices, updateInvoice, deleteInvoice, restoreInvoice, setCurrentInvoice } = useData()
+  const { invoices, updateInvoice, deleteInvoice, restoreInvoice, setCurrentInvoice, customers } = useData()
   const { openModal } = useModal()
   const { showSuccess, showWarning, showDelete } = useNotification()
   const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; invoiceId: number | null; invoiceNumber: string }>({
@@ -24,6 +24,10 @@ export default function InvoicesView({ setCurrentView }: InvoicesViewProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState<'date' | 'number' | 'customer' | 'amount' | 'status'>('date')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+
+  const isOverdue = (dueDate: string) => {
+    return new Date(dueDate) < new Date() && new Date(dueDate).toDateString() !== new Date().toDateString()
+  }
 
   const handleTogglePaid = (invoiceId: number) => {
     const invoice = invoices.find(inv => inv.id === invoiceId)
@@ -43,6 +47,27 @@ export default function InvoicesView({ setCurrentView }: InvoicesViewProps) {
         )
       }
     }
+  }
+
+  const handleSendReminder = (invoice: Invoice) => {
+    const customer = customers.find(c => c.id === invoice.customerId)
+    const customerEmail = customer?.email || ''
+    
+    const subject = encodeURIComponent(`Zahlungserinnerung: Rechnung ${invoice.number}`)
+    const body = encodeURIComponent(
+      `Sehr geehrte Damen und Herren,\n\n` +
+      `hiermit möchte ich Sie an die noch ausstehende Zahlung für Rechnung ${invoice.number} vom ${formatDate(invoice.date)} erinnern.\n\n` +
+      `Rechnungsbetrag: ${formatCurrency(invoice.amount)}\n` +
+      `Fällig seit: ${formatDate(invoice.dueDate)}\n\n` +
+      `Bitte überweisen Sie den Betrag baldmöglichst.\n\n` +
+      `Mit freundlichen Grüßen`
+    )
+    window.location.href = `mailto:${customerEmail}?subject=${subject}&body=${body}`
+    
+    showSuccess(
+      `Erinnerung vorbereitet`,
+      `E-Mail-Programm wird geöffnet für ${invoice.number}`
+    )
   }
 
   const handleDeleteInvoice = (invoiceId: number) => {
@@ -236,14 +261,18 @@ export default function InvoicesView({ setCurrentView }: InvoicesViewProps) {
                     <td className="p-4">{formatDate(invoice.dueDate)}</td>
                     <td className="p-4 text-right font-semibold">{formatCurrency(invoice.amount)}</td>
                     <td className="p-4 text-center">
-                      <label className="flex items-center justify-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={invoice.paid}
-                          onChange={() => handleTogglePaid(invoice.id)}
-                        />
-                        <span className="text-sm">{invoice.paid ? 'Bezahlt' : 'Ausstehend'}</span>
-                      </label>
+                      <button
+                        onClick={() => handleTogglePaid(invoice.id)}
+                        className={`px-3 py-1 rounded-full text-sm font-medium cursor-pointer transition-colors ${
+                          invoice.paid 
+                            ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                            : !invoice.paid && isOverdue(invoice.dueDate)
+                            ? 'bg-red-100 text-red-800 hover:bg-red-200'
+                            : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                        }`}
+                      >
+                        {invoice.paid ? 'Bezahlt' : isOverdue(invoice.dueDate) ? 'Überfällig' : 'Ausstehend'}
+                      </button>
                     </td>
                     <td className="p-4">
                       <div className="flex gap-1 justify-center flex-wrap">
@@ -271,6 +300,14 @@ export default function InvoicesView({ setCurrentView }: InvoicesViewProps) {
                         >
                           ⌫
                         </button>
+                        {!invoice.paid && isOverdue(invoice.dueDate) && (
+                          <button
+                            onClick={() => handleSendReminder(invoice)}
+                            className="px-2 py-1 bg-red-100 text-red-800 border border-black rounded text-xs font-medium hover:bg-red-200 transition-colors"
+                          >
+                            Erinnern
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -291,13 +328,18 @@ export default function InvoicesView({ setCurrentView }: InvoicesViewProps) {
                 </div>
                 <div className="text-right">
                   <p className="font-bold text-base sm:text-lg">{formatCurrency(invoice.amount)}</p>
-                  <span className={`inline-block px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs font-medium ${
-                    invoice.paid 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {invoice.paid ? 'Bezahlt' : 'Ausstehend'}
-                  </span>
+                  <button
+                    onClick={() => handleTogglePaid(invoice.id)}
+                    className={`inline-block px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs font-medium cursor-pointer transition-colors ${
+                      invoice.paid 
+                        ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                        : !invoice.paid && isOverdue(invoice.dueDate)
+                        ? 'bg-red-100 text-red-800 hover:bg-red-200'
+                        : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                    }`}
+                  >
+                    {invoice.paid ? 'Bezahlt' : isOverdue(invoice.dueDate) ? 'Überfällig' : 'Ausstehend'}
+                  </button>
                 </div>
               </div>
               
@@ -335,21 +377,21 @@ export default function InvoicesView({ setCurrentView }: InvoicesViewProps) {
                 </button>
                 <button
                   onClick={() => handleDeleteInvoice(invoice.id)}
-                  className="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-100 text-black border-3 border-black rounded-lg font-medium hover:bg-red-200 transition-colors text-sm"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-100 text-black border-3 border-black rounded-lg font-medium hover:bg-red-200 transition-colors flex items-center justify-center"
                 >
-                  ⌫
+                  <span className="text-2xl">⌫</span>
                 </button>
               </div>
-              <div className="flex gap-2">
-                <label className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 flex-1">
-                  <input
-                    type="checkbox"
-                    checked={invoice.paid}
-                    onChange={() => handleTogglePaid(invoice.id)}
-                  />
-                  <span className="text-sm">Bezahlt</span>
-                </label>
-              </div>
+              {!invoice.paid && isOverdue(invoice.dueDate) && (
+                <div className="mt-2">
+                  <button
+                    onClick={() => handleSendReminder(invoice)}
+                    className="w-full px-3 py-1.5 sm:px-4 sm:py-2 bg-red-100 text-red-800 border-3 border-black rounded-lg font-medium hover:bg-red-200 transition-colors text-sm flex items-center justify-center gap-2"
+                  >
+                    Zahlungserinnerung senden
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>

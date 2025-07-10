@@ -14,9 +14,11 @@ function FeedbackButton() {
   
   // ALWAYS call the hook, even during SSR
   let showFeedbackModal = () => {}
+  let hasGivenFeedback = false
   try {
     const userActivity = useUserActivity()
     showFeedbackModal = userActivity.showFeedbackModal
+    hasGivenFeedback = userActivity.hasGivenFeedback
   } catch {
     // Hook will fail during SSR or before provider loads
     showFeedbackModal = () => {}
@@ -25,6 +27,11 @@ function FeedbackButton() {
   useEffect(() => {
     setIsHydrated(true)
   }, [])
+
+  // Zeige Button nicht an, wenn bereits Feedback gegeben wurde
+  if (hasGivenFeedback) {
+    return null
+  }
 
   return (
     <button 

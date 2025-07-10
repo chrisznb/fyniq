@@ -15,6 +15,9 @@ import {
 interface FloatingTabNavigationProps {
   currentView: ViewType
   setCurrentView: (view: ViewType) => void
+  showOnboarding?: boolean
+  showCookieBanner?: boolean
+  showFeedbackModal?: boolean
 }
 
 const tabConfig = [
@@ -24,7 +27,7 @@ const tabConfig = [
   { key: 'profile' as ViewType, icon: User, label: 'Account' },
 ]
 
-export default function FloatingTabNavigation({ currentView, setCurrentView }: FloatingTabNavigationProps) {
+export default function FloatingTabNavigation({ currentView, setCurrentView, showOnboarding, showCookieBanner, showFeedbackModal }: FloatingTabNavigationProps) {
   const [isOpen, setIsOpen] = useState(false)
   const { currentModal } = useModal()
 
@@ -32,8 +35,8 @@ export default function FloatingTabNavigation({ currentView, setCurrentView }: F
     setIsOpen(!isOpen)
   }
 
-  // Hide FAB when any modal is open
-  const shouldHideFAB = currentModal !== null
+  // Hide FAB when any modal is open, or when cookie banner/onboarding/feedback modal is shown
+  const shouldHideFAB = currentModal !== null || showOnboarding || showCookieBanner || showFeedbackModal
 
   const handleTabSelect = (view: ViewType) => {
     setCurrentView(view)

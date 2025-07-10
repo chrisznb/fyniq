@@ -13,7 +13,8 @@ import {
   TrendingUp, 
   MessageCircle, 
   MapPin, 
-  Lightbulb 
+  Lightbulb,
+  X 
 } from 'lucide-react'
 
 interface OnboardingModalProps {
@@ -70,7 +71,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
 
   const onboardingSteps: OnboardingStep[] = useMemo(() => [
     {
-      title: "Willkommen bei fyniq!",
+      title: "Willkommen!",
       icon: <FyniqIcon />,
       content: (
         <div className="space-y-4">
@@ -89,7 +90,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
       )
     },
     {
-      title: "Account - Deine Firmendaten",
+      title: "Account",
       icon: <User className="w-6 h-6" />,
       content: (
         <div className="space-y-4">
@@ -168,7 +169,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
       )
     },
     {
-      title: "Dashboard - Dein Überblick",
+      title: "Dashboard",
       icon: <BarChart3 className="w-6 h-6" />,
       content: (
         <div className="space-y-4">
@@ -245,6 +246,16 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
   useEffect(() => {
     if (isOpen) {
       setIsVisible(true)
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden'
+    } else {
+      // Re-enable body scroll when modal is closed
+      document.body.style.overflow = 'unset'
+    }
+    
+    // Cleanup function to reset overflow when component unmounts
+    return () => {
+      document.body.style.overflow = 'unset'
     }
   }, [isOpen])
 
@@ -290,22 +301,18 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
         `}
       >
         {/* Header mit Schritt-Indikator */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
-            <div className="text-black">{currentStepData.icon}</div>
+            <div className="text-black flex-shrink-0">{currentStepData.icon}</div>
             <h2 className="text-xl font-bold">{currentStepData.title}</h2>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">
-              {currentStep + 1} / {onboardingSteps.length}
-            </span>
-            <button
-              onClick={handleSkip}
-              className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1"
-            >
-              Überspringen
-            </button>
-          </div>
+          <button
+            onClick={handleSkip}
+            className="text-gray-500 hover:text-gray-700 transition-colors"
+            aria-label="Schließen"
+          >
+            <X className="w-6 h-6" />
+          </button>
         </div>
 
         {/* Schritt-Indikatoren */}
@@ -368,8 +375,8 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
             )}
           </div>
           
-          {/* Keyboard-Hints */}
-          <p className="text-xs text-gray-400 text-center">
+          {/* Keyboard-Hints - nur auf Desktop */}
+          <p className="hidden sm:block text-xs text-gray-400 text-center">
             ← → Pfeiltasten zum Navigieren • ESC zum Überspringen
           </p>
         </div>

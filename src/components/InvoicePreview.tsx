@@ -34,6 +34,23 @@ export default function InvoicePreview({ setCurrentView }: InvoicePreviewProps) 
   // Get tax identification for display
   const taxId = profile.smallBusinessId || profile.vatId || profile.taxNumber || ''
 
+  const sendInvoiceByEmail = () => {
+    if (!currentInvoice || !customer) return
+    
+    const subject = encodeURIComponent(`Rechnung ${currentInvoice.number}`)
+    const body = encodeURIComponent(
+      `Sehr geehrte Damen und Herren,\n\n` +
+      `anbei erhalten Sie die Rechnung ${currentInvoice.number} vom ${formatDate(currentInvoice.date)}.\n\n` +
+      `Rechnungsbetrag: ${formatCurrency(currentInvoice.amount)}\n` +
+      `Zahlbar bis: ${formatDate(currentInvoice.dueDate)}\n\n` +
+      `Bitte überweisen Sie den Betrag bis zum Fälligkeitsdatum auf unser Konto.\n\n` +
+      `Mit freundlichen Grüßen\n` +
+      `${profile.companyName || 'Ihr Unternehmen'}`
+    )
+    
+    window.location.href = `mailto:${customer?.email || ''}?subject=${subject}&body=${body}`
+  }
+
   const downloadPDF = async () => {
     if (!currentInvoice || !customer) return
 
@@ -42,8 +59,9 @@ export default function InvoicePreview({ setCurrentView }: InvoicePreviewProps) 
     if (!invoiceElement) return
 
     try {
-      // Add PDF export class to fix color compatibility
+      // Add PDF export class to fix color compatibility and force desktop layout
       invoiceElement.classList.add('pdf-export')
+      invoiceElement.classList.add('pdf-desktop-layout')
       
       // Force style recomputation by triggering a reflow
       void invoiceElement.offsetHeight
@@ -72,10 +90,11 @@ export default function InvoicePreview({ setCurrentView }: InvoicePreviewProps) 
         scrollX: 0,
         scrollY: 0,
         onclone: (clonedDoc: Document) => {
-          // Ensure the cloned document also has PDF export styles
+          // Ensure the cloned document also has PDF export styles and desktop layout
           const clonedElement = clonedDoc.getElementById('invoice-to-pdf')
           if (clonedElement) {
             clonedElement.classList.add('pdf-export')
+            clonedElement.classList.add('pdf-desktop-layout')
             // Force all elements to use RGB colors
             const allElements = clonedElement.querySelectorAll('*')
             allElements.forEach(el => {
@@ -101,8 +120,9 @@ export default function InvoicePreview({ setCurrentView }: InvoicePreviewProps) 
       }
       const canvas = await html2canvas(invoiceElement, options as Parameters<typeof html2canvas>[1])
 
-      // Remove PDF export class
+      // Remove PDF export classes
       invoiceElement.classList.remove('pdf-export')
+      invoiceElement.classList.remove('pdf-desktop-layout')
 
       // Calculate PDF dimensions
       const pdf = new jsPDF('p', 'mm', 'a4')
@@ -110,7 +130,7 @@ export default function InvoicePreview({ setCurrentView }: InvoicePreviewProps) 
       // A4 dimensions in mm
       const pdfWidth = 210
       const pdfHeight = 297
-      const margin = 10
+      const margin = 10 // Standard margin for desktop layout
       const availableWidth = pdfWidth - (2 * margin)
       const availableHeight = pdfHeight - (2 * margin)
       
@@ -202,6 +222,12 @@ export default function InvoicePreview({ setCurrentView }: InvoicePreviewProps) 
             className="px-4 sm:px-6 py-2 sm:py-3 bg-[var(--accent)] text-black border-3 border-black rounded-lg font-semibold hover:shadow-lg transition-all text-sm sm:text-base"
           >
             PDF Download
+          </button>
+          <button
+            onClick={sendInvoiceByEmail}
+            className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-100 text-black border-3 border-black rounded-lg font-semibold hover:shadow-lg transition-all text-sm sm:text-base"
+          >
+            Per E-Mail versenden
           </button>
           <button 
             onClick={() => setCurrentView('invoices')}

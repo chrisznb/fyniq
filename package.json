@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@formspree/react": "^3.0.0",
     "@types/crypto-js": "^4.2.2",
     "@types/dompurify": "^3.0.5",
     "@types/html2canvas": "^0.5.35",
